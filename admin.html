@@ -3,474 +3,700 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HAVEN — Панель управления</title>
+  <title>HAVEN — Управление сайтом</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-
-  <!-- Firebase SDK -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
   <style>
-    :root{--dark:#1A1714;--cream:#F5F0E8;--sand:#EAE0D2;--warm:#8B7355;--accent:#C4A882;--muted:#6B6058}
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--cream);min-height:100vh}
+    :root {
+      --dark:#1A1714; --cream:#F5F0E8; --sand:#EAE0D2;
+      --warm:#8B7355; --accent:#C4A882; --muted:#6B6058;
+      --green:#4a7a4a; --red:#8B3A3A;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'DM Sans',sans-serif; background:#f4f1ec; min-height:100vh; }
 
-    /* ── LOGIN ── */
-    #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh}
-    .login-box{width:400px;padding:56px 48px;border:1px solid rgba(196,168,130,0.2)}
-    .login-logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;font-weight:300;letter-spacing:8px;color:var(--cream);text-align:center;margin-bottom:6px}
-    .login-sub{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);text-align:center;margin-bottom:44px}
-    .fl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:block}
-    .fi{width:100%;padding:12px 15px;background:rgba(255,255,255,0.06);border:1px solid rgba(196,168,130,0.2);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .3s;margin-bottom:18px}
-    .fi:focus{border-color:var(--accent)}.fi::placeholder{color:rgba(245,240,232,0.22)}
-    .l-btn{width:100%;padding:14px;background:var(--accent);color:var(--dark);border:none;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:500;transition:background .3s}
-    .l-btn:hover{background:#d4b892}
-    .l-err{font-size:12px;color:#c47070;text-align:center;margin-top:14px;min-height:16px}
-    .l-hint{margin-top:20px;font-size:11px;color:var(--muted);text-align:center;line-height:1.7}
-    .l-hint b{color:var(--accent)}
+    /* ══ LOGIN ══ */
+    #login-screen {
+      display:flex; align-items:center; justify-content:center;
+      min-height:100vh; background:var(--dark);
+    }
+    .login-box {
+      background:rgba(255,255,255,0.04); border:1px solid rgba(196,168,130,0.25);
+      padding:56px 48px; width:380px;
+    }
+    .login-logo { font-family:'Cormorant Garamond',Georgia,serif; font-size:36px; font-weight:300; letter-spacing:8px; color:var(--cream); text-align:center; margin-bottom:6px; }
+    .login-tagline { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); text-align:center; margin-bottom:48px; }
+    .login-field { width:100%; padding:13px 16px; background:rgba(255,255,255,0.07); border:1px solid rgba(196,168,130,0.22); color:var(--cream); font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:14px; transition:border-color .3s; }
+    .login-field:focus { border-color:var(--accent); }
+    .login-field::placeholder { color:rgba(245,240,232,0.28); }
+    .login-submit { width:100%; padding:14px; background:var(--accent); color:var(--dark); border:none; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:2.5px; text-transform:uppercase; cursor:pointer; font-weight:500; transition:background .3s; margin-top:6px; }
+    .login-submit:hover { background:#d4b892; }
+    .login-err { color:#c47070; font-size:12px; text-align:center; margin-top:14px; min-height:16px; }
+    .login-hint { color:rgba(107,96,88,0.7); font-size:11px; text-align:center; margin-top:20px; }
+    .login-hint b { color:var(--accent); }
 
-    /* ── PANEL ── */
-    #admin-panel{display:none;min-height:100vh}
-    .adm-hdr{background:rgba(26,23,20,0.98);border-bottom:1px solid rgba(196,168,130,0.15);padding:0 48px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
-    .adm-logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:300;letter-spacing:6px;color:var(--cream)}
-    .adm-logo span{font-size:11px;letter-spacing:2px;color:var(--accent);vertical-align:middle;margin-left:12px}
-    .hdr-r{display:flex;align-items:center;gap:14px}
-    .db-status{font-size:11px;padding:5px 12px;border:1px solid rgba(196,168,130,0.2)}
-    .db-status.ok{color:#7ab87a;border-color:rgba(122,184,122,0.3)}
-    .db-status.err{color:#c47070;border-color:rgba(196,112,112,0.3)}
-    .db-status.loading{color:var(--muted)}
-    .site-lnk{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);text-decoration:none;padding:8px 18px;border:1px solid rgba(196,168,130,0.3);transition:all .3s}
-    .site-lnk:hover{background:rgba(196,168,130,0.1)}
-    .logout-btn{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);background:transparent;border:none;cursor:pointer;transition:color .3s}
-    .logout-btn:hover{color:var(--cream)}
+    /* ══ HEADER ══ */
+    #admin-panel { display:none; }
+    .header {
+      background:var(--dark); height:60px; padding:0 40px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:100;
+    }
+    .header-logo { font-family:'Cormorant Garamond',Georgia,serif; font-size:20px; font-weight:300; letter-spacing:5px; color:var(--cream); }
+    .header-logo sup { font-size:10px; letter-spacing:2px; color:var(--accent); vertical-align:top; margin-top:4px; margin-left:4px; }
+    .header-right { display:flex; align-items:center; gap:12px; }
+    .db-dot { width:8px; height:8px; border-radius:50%; background:#888; transition:background .3s; }
+    .db-dot.green { background:#7ab87a; }
+    .db-dot.red   { background:#c47070; }
+    .db-label { font-size:11px; color:rgba(245,240,232,0.45); }
+    .view-site { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); text-decoration:none; padding:7px 16px; border:1px solid rgba(196,168,130,0.3); transition:all .3s; }
+    .view-site:hover { background:rgba(196,168,130,0.1); }
+    .logout { background:transparent; border:none; color:rgba(245,240,232,0.35); font-family:'DM Sans',sans-serif; font-size:11px; cursor:pointer; transition:color .3s; }
+    .logout:hover { color:var(--cream); }
 
-    .adm-body{display:grid;grid-template-columns:310px 1fr;min-height:calc(100vh - 64px)}
+    /* ══ MAIN LAYOUT ══ */
+    .main { max-width:1200px; margin:0 auto; padding:40px 32px; }
 
-    /* ── SIDEBAR ── */
-    .sidebar{background:rgba(255,255,255,0.03);border-right:1px solid rgba(196,168,130,0.1);padding:32px 24px;overflow-y:auto;max-height:calc(100vh - 64px)}
-    .sb-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:300;color:var(--cream);margin-bottom:24px}
-    .fg{margin-bottom:15px}
-    .flabel{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
-    .finput,.fselect,.ftextarea{width:100%;padding:10px 13px;background:rgba(255,255,255,0.06);border:1px solid rgba(196,168,130,0.2);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .3s}
-    .finput:focus,.fselect:focus,.ftextarea:focus{border-color:var(--accent)}
-    .finput::placeholder,.ftextarea::placeholder{color:rgba(245,240,232,0.22)}
-    .fselect option{background:#2a2520}
-    .ftextarea{resize:vertical;min-height:72px}
-    .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .add-btn{width:100%;padding:13px;background:var(--accent);color:var(--dark);border:none;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:500;transition:background .3s;margin-top:6px}
-    .add-btn:hover{background:#d4b892}.add-btn:disabled{background:var(--muted);cursor:not-allowed}
-    .f-ok{font-size:12px;text-align:center;margin-top:10px;min-height:16px}
-    .img-tip{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6}
-    .img-tip a{color:var(--accent);text-decoration:none}
+    /* ══ PAGE TITLE ══ */
+    .page-title { font-family:'Cormorant Garamond',Georgia,serif; font-size:32px; font-weight:300; color:var(--dark); margin-bottom:6px; }
+    .page-subtitle { font-size:13px; color:var(--muted); margin-bottom:32px; }
 
-    /* ── MAIN ── */
-    .adm-main{padding:32px 36px;overflow-y:auto}
-    .main-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:14px}
-    .main-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;font-weight:300;color:var(--cream)}
-    .stats-row{display:flex;gap:12px;flex-wrap:wrap}
-    .s-chip{background:rgba(255,255,255,0.05);border:1px solid rgba(196,168,130,0.15);padding:7px 16px;font-size:12px}
-    .s-chip b{color:var(--accent);font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;font-weight:300;margin-right:5px}
-    .f-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
-    .fc{padding:7px 18px;background:transparent;border:1px solid rgba(196,168,130,0.2);color:rgba(245,240,232,0.55);font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .3s}
-    .fc:hover{border-color:var(--accent);color:var(--accent)}.fc.active{background:var(--accent);color:var(--dark);border-color:var(--accent)}
+    /* ══ STATS BAR ══ */
+    .stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:36px; }
+    .stat-card { background:#fff; border:1px solid rgba(139,115,85,0.15); padding:20px 24px; }
+    .stat-card-num { font-family:'Cormorant Garamond',Georgia,serif; font-size:40px; font-weight:300; color:var(--dark); line-height:1; }
+    .stat-card-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-top:4px; }
 
-    /* ── PROP ROWS ── */
-    .prop-list{display:flex;flex-direction:column;gap:10px}
-    .prow{background:rgba(255,255,255,0.04);border:1px solid rgba(196,168,130,0.1);display:grid;grid-template-columns:90px 1fr auto;overflow:hidden;transition:border-color .3s}
-    .prow:hover{border-color:rgba(196,168,130,0.3)}.prow.sold{opacity:.4}
-    .pthumb{width:90px;height:75px;object-fit:cover;display:block}
-    .pthumb-ph{width:90px;height:75px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:22px}
-    .pinfo{padding:12px 16px;display:flex;flex-direction:column;justify-content:center;gap:3px}
-    .pname{font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;font-weight:300;color:var(--cream)}
-    .pmeta{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .pprice{font-size:13px;color:var(--accent);font-family:'Cormorant Garamond',Georgia,serif}
-    .pdate{font-size:10px;color:rgba(107,96,88,0.7);margin-top:2px}
-    .pbadge{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px}
-    .pbadge.buy{background:rgba(196,168,130,0.18);color:var(--accent)}
-    .pbadge.rent{background:rgba(139,115,85,0.18);color:var(--warm)}
-    .pbadge.sold-b{background:rgba(139,58,58,0.25);color:#c47070}
-    .pactions{padding:10px 14px;display:flex;flex-direction:column;gap:6px;justify-content:center;min-width:136px}
-    .abtn{padding:6px 12px;font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;transition:all .3s;text-align:center}
-    .abtn-edit{background:rgba(196,168,130,0.14);color:var(--accent)}.abtn-edit:hover{background:rgba(196,168,130,0.28)}
-    .abtn-tog{background:rgba(139,115,85,0.14);color:var(--warm)}.abtn-tog:hover{background:rgba(139,115,85,0.28)}
-    .abtn-del{background:rgba(139,58,58,0.14);color:#c47070}.abtn-del:hover{background:rgba(139,58,58,0.28)}
+    /* ══ SETUP NOTICE ══ */
+    .setup-notice { background:#fff; border:1px solid rgba(196,168,130,0.4); border-left:4px solid var(--accent); padding:20px 24px; margin-bottom:32px; display:none; }
+    .setup-notice.show { display:block; }
+    .setup-notice-title { font-size:14px; font-weight:500; color:var(--dark); margin-bottom:8px; }
+    .setup-notice-text { font-size:13px; color:var(--muted); line-height:1.7; }
+    .setup-notice-text ol { margin:8px 0 0 18px; }
+    .setup-notice-text li { margin-bottom:4px; }
+    .setup-notice-text a { color:var(--accent); }
 
-    .empty-st{text-align:center;padding:70px 30px}
-    .empty-st-ic{font-size:44px;margin-bottom:16px;opacity:.35}
-    .empty-st-tx{font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-weight:300;color:var(--muted)}
+    /* ══ TWO COLUMN ══ */
+    .two-col { display:grid; grid-template-columns:420px 1fr; gap:28px; align-items:start; }
 
-    /* ── SETUP BANNER (если Firebase не настроен) ── */
-    #setup-banner{background:rgba(196,168,130,0.08);border:1px solid rgba(196,168,130,0.25);padding:20px 28px;margin-bottom:24px;display:none}
-    #setup-banner.show{display:block}
-    .setup-title{font-size:14px;font-weight:500;color:var(--accent);margin-bottom:8px}
-    .setup-text{font-size:13px;color:var(--muted);line-height:1.7}
-    .setup-text ol{margin-left:20px;margin-top:8px}
-    .setup-text li{margin-bottom:4px}
-    .setup-text b{color:var(--cream)}
-    .setup-text a{color:var(--accent)}
+    /* ══ ADD FORM CARD ══ */
+    .card { background:#fff; border:1px solid rgba(139,115,85,0.15); }
+    .card-header { padding:22px 28px 18px; border-bottom:1px solid rgba(139,115,85,0.1); }
+    .card-title { font-family:'Cormorant Garamond',Georgia,serif; font-size:22px; font-weight:300; color:var(--dark); }
+    .card-body { padding:24px 28px; }
 
-    /* ── EDIT MODAL ── */
-    #edit-modal{display:none;position:fixed;inset:0;background:rgba(26,23,20,0.92);z-index:200;align-items:center;justify-content:center;padding:20px}
-    #edit-modal.active{display:flex}
-    .mbox{background:#1e1b18;border:1px solid rgba(196,168,130,0.2);width:100%;max-width:580px;max-height:90vh;overflow-y:auto;padding:36px}
-    .m-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-weight:300;color:var(--cream);margin-bottom:24px}
-    .m-footer{display:flex;gap:10px;margin-top:20px}
-    .m-save{flex:1;padding:13px;background:var(--accent);color:var(--dark);border:none;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:500;transition:background .3s}
-    .m-save:hover{background:#d4b892}
-    .m-cancel{padding:13px 22px;background:transparent;color:var(--muted);border:1px solid rgba(196,168,130,0.2);font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .3s}
-    .m-cancel:hover{color:var(--cream)}
+    .field-label { display:block; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:7px; }
+    .field-required { color:var(--accent); }
+    .field-input, .field-select, .field-textarea {
+      width:100%; padding:11px 14px; border:1px solid rgba(139,115,85,0.25); background:#fafaf8;
+      font-family:'DM Sans',sans-serif; font-size:13px; color:var(--dark); outline:none;
+      transition:border-color .3s;
+    }
+    .field-input:focus, .field-select:focus, .field-textarea:focus { border-color:var(--accent); background:#fff; }
+    .field-input::placeholder, .field-textarea::placeholder { color:#b0a89a; }
+    .field-textarea { resize:vertical; min-height:80px; }
+    .field-group { margin-bottom:18px; }
+    .field-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .field-hint { font-size:11px; color:var(--muted); margin-top:5px; line-height:1.5; }
+    .field-hint a { color:var(--accent); }
 
-    @media(max-width:860px){
-      .adm-body{grid-template-columns:1fr}
-      .sidebar{max-height:none;border-right:none;border-bottom:1px solid rgba(196,168,130,0.1)}
-      .prow{grid-template-columns:80px 1fr}.pactions{grid-column:span 2;flex-direction:row;border-top:1px solid rgba(196,168,130,0.08)}
+    /* Toggle buttons for type/deal */
+    .toggle-group { display:flex; gap:0; }
+    .toggle-btn { flex:1; padding:10px; border:1px solid rgba(139,115,85,0.25); background:#fafaf8; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:all .3s; text-align:center; }
+    .toggle-btn:not(:last-child) { border-right:none; }
+    .toggle-btn.active { background:var(--dark); color:var(--cream); border-color:var(--dark); }
+
+    .img-preview { width:100%; height:140px; object-fit:cover; display:none; margin-top:10px; border:1px solid rgba(139,115,85,0.15); }
+    .img-preview.show { display:block; }
+
+    .submit-btn { width:100%; padding:14px; background:var(--accent); color:var(--dark); border:none; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:2.5px; text-transform:uppercase; cursor:pointer; font-weight:500; transition:background .3s; margin-top:8px; }
+    .submit-btn:hover { background:#d4b892; }
+    .submit-btn:disabled { background:var(--muted); cursor:not-allowed; }
+    .form-msg { font-size:12px; text-align:center; margin-top:12px; min-height:16px; transition:opacity .3s; }
+
+    /* ══ LISTINGS ══ */
+    .listings-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:12px; }
+    .listings-title { font-family:'Cormorant Garamond',Georgia,serif; font-size:20px; font-weight:300; color:var(--dark); }
+    .filter-tabs { display:flex; gap:4px; }
+    .filter-tab { padding:7px 16px; background:transparent; border:1px solid rgba(139,115,85,0.2); font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:all .3s; }
+    .filter-tab:hover { border-color:var(--accent); color:var(--warm); }
+    .filter-tab.active { background:var(--dark); color:var(--cream); border-color:var(--dark); }
+
+    /* Property card in admin */
+    .prop-cards { display:flex; flex-direction:column; gap:10px; }
+    .prop-card { background:#fff; border:1px solid rgba(139,115,85,0.15); display:grid; grid-template-columns:100px 1fr; overflow:hidden; transition:border-color .3s; }
+    .prop-card:hover { border-color:rgba(139,115,85,0.4); }
+    .prop-card.is-sold { opacity:.45; }
+    .prop-img { width:100px; height:82px; object-fit:cover; display:block; }
+    .prop-img-ph { width:100px; height:82px; background:var(--sand); display:flex; align-items:center; justify-content:center; font-size:26px; }
+    .prop-body { padding:12px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .prop-info { flex:1; min-width:0; }
+    .prop-name { font-family:'Cormorant Garamond',Georgia,serif; font-size:17px; font-weight:300; color:var(--dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .prop-meta { font-size:12px; color:var(--muted); margin-top:3px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .prop-price { font-size:13px; color:var(--warm); font-family:'Cormorant Garamond',Georgia,serif; margin-top:4px; }
+    .prop-date { font-size:10px; color:rgba(107,96,88,0.6); }
+    .badge { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:2px 8px; }
+    .badge-buy  { background:rgba(196,168,130,0.2); color:var(--warm); }
+    .badge-rent { background:rgba(139,115,85,0.15); color:var(--warm); }
+    .badge-sold { background:rgba(139,58,58,0.12); color:#8B3A3A; }
+
+    /* Action buttons */
+    .prop-actions { display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
+    .act { padding:7px 14px; font-family:'DM Sans',sans-serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; border:none; transition:all .3s; white-space:nowrap; }
+    .act-edit { background:rgba(196,168,130,0.15); color:var(--warm); }
+    .act-edit:hover { background:rgba(196,168,130,0.3); }
+    .act-sold { background:rgba(139,115,85,0.1); color:var(--warm); }
+    .act-sold:hover { background:rgba(139,115,85,0.25); }
+    .act-delete { background:rgba(139,58,58,0.08); color:#8B3A3A; }
+    .act-delete:hover { background:rgba(139,58,58,0.2); }
+
+    .empty-state { text-align:center; padding:60px 24px; color:var(--muted); }
+    .empty-icon { font-size:40px; margin-bottom:14px; opacity:.4; }
+    .empty-text { font-family:'Cormorant Garamond',Georgia,serif; font-size:22px; font-weight:300; }
+
+    /* ══ EDIT MODAL ══ */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(26,23,20,0.7); z-index:500; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; }
+    .modal-header { padding:24px 28px 20px; border-bottom:1px solid rgba(139,115,85,0.12); display:flex; justify-content:space-between; align-items:center; }
+    .modal-title { font-family:'Cormorant Garamond',Georgia,serif; font-size:24px; font-weight:300; color:var(--dark); }
+    .modal-close { background:transparent; border:none; font-size:20px; color:var(--muted); cursor:pointer; line-height:1; padding:4px; }
+    .modal-body { padding:24px 28px; }
+    .modal-footer { padding:18px 28px; border-top:1px solid rgba(139,115,85,0.12); display:flex; gap:10px; }
+    .modal-save { flex:1; padding:13px; background:var(--accent); color:var(--dark); border:none; font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; font-weight:500; transition:background .3s; }
+    .modal-save:hover { background:#d4b892; }
+    .modal-cancel { padding:13px 22px; background:transparent; color:var(--muted); border:1px solid rgba(139,115,85,0.2); font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; }
+    .modal-cancel:hover { color:var(--dark); border-color:rgba(139,115,85,0.4); }
+
+    /* ══ SUCCESS TOAST ══ */
+    .toast {
+      position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px);
+      background:var(--dark); color:var(--cream); padding:13px 28px;
+      font-size:13px; z-index:999; opacity:0; transition:all .35s;
+      white-space:nowrap; pointer-events:none;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    @media(max-width:900px){
+      .two-col { grid-template-columns:1fr; }
+      .stats-bar { grid-template-columns:repeat(2,1fr); }
+    }
+    @media(max-width:560px){
+      .main { padding:24px 16px; }
+      .stats-bar { grid-template-columns:1fr 1fr; }
+      .prop-card { grid-template-columns:80px 1fr; }
+      .prop-actions { flex-direction:row; }
     }
   </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ══ LOGIN ══ -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">HAVEN</div>
-    <div class="login-sub">Панель управления</div>
-    <label class="fl">Логин</label>
-    <input class="fi" id="l-user" type="text" placeholder="admin">
-    <label class="fl">Пароль</label>
-    <input class="fi" id="l-pass" type="password" placeholder="••••••••">
-    <button class="l-btn" id="l-btn">Войти</button>
-    <div class="l-err" id="l-err"></div>
-    <div class="l-hint">
-      Логин: <b>admin</b> &nbsp;·&nbsp; Пароль: <b>haven2024</b><br>
-      <span style="color:rgba(107,96,88,0.6);font-size:10px">Смени пароль в файле admin.html после настройки</span>
-    </div>
+    <div class="login-tagline">Управление сайтом</div>
+    <input class="login-field" id="l-user" type="text" placeholder="Логин">
+    <input class="login-field" id="l-pass" type="password" placeholder="Пароль">
+    <button class="login-submit" id="l-submit">Войти →</button>
+    <div class="login-err" id="l-err"></div>
+    <div class="login-hint">Логин: <b>admin</b> &nbsp;·&nbsp; Пароль: <b>haven2024</b></div>
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
+<!-- ══ ADMIN PANEL ══ -->
 <div id="admin-panel">
-  <div class="adm-hdr">
-    <div class="adm-logo">HAVEN <span>Admin</span></div>
-    <div class="hdr-r">
-      <div class="db-status loading" id="db-status">⏳ Подключение...</div>
-      <a href="index.html" class="site-lnk" target="_blank">← На сайт</a>
-      <button class="logout-btn" id="logout-btn">Выйти</button>
+
+  <div class="header">
+    <div class="header-logo">HAVEN <sup>Admin</sup></div>
+    <div class="header-right">
+      <div class="db-dot" id="db-dot"></div>
+      <span class="db-label" id="db-label">Подключение...</span>
+      <a href="index.html" class="view-site" target="_blank">Смотреть сайт →</a>
+      <button class="logout" id="logout-btn">Выйти</button>
     </div>
   </div>
 
-  <div class="adm-body">
+  <div class="main">
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="sb-title">+ Добавить объект</div>
+    <div class="page-title">Управление объектами</div>
+    <div class="page-subtitle">Добавляйте, редактируйте и удаляйте объекты — изменения появляются на сайте мгновенно</div>
 
-      <div class="fg"><label class="flabel">Название (RU) *</label><input class="finput" id="f-name-ru" placeholder="Вилла «Лагуна»"></div>
-      <div class="fg"><label class="flabel">Название (EN)</label><input class="finput" id="f-name-en" placeholder="Villa Laguna"></div>
-      <div class="fg"><label class="flabel">Название (ES)</label><input class="finput" id="f-name-es" placeholder="Villa Laguna"></div>
-      <div class="fg"><label class="flabel">Локация *</label><input class="finput" id="f-loc" placeholder="Torrevieja, Costa Blanca"></div>
-      <div class="frow">
-        <div class="fg"><label class="flabel">Тип</label>
-          <select class="fselect" id="f-type"><option value="apartment">Квартира</option><option value="house">Дом/Вилла</option></select></div>
-        <div class="fg"><label class="flabel">Сделка</label>
-          <select class="fselect" id="f-deal"><option value="buy">Продажа</option><option value="rent">Аренда</option></select></div>
+    <!-- Статистика -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-card-num" id="stat-total">—</div>
+        <div class="stat-card-label">Всего объектов</div>
       </div>
-      <div class="frow">
-        <div class="fg"><label class="flabel">Цена € (число) *</label><input class="finput" id="f-price" type="number" placeholder="285000"></div>
-        <div class="fg"><label class="flabel">Цена (текст)</label><input class="finput" id="f-price-txt" placeholder="€ 285 000"></div>
+      <div class="stat-card">
+        <div class="stat-card-num" id="stat-sale">—</div>
+        <div class="stat-card-label">На продажу</div>
       </div>
-      <div class="frow">
-        <div class="fg"><label class="flabel">Спален</label><input class="finput" id="f-beds" type="number" placeholder="3"></div>
-        <div class="fg"><label class="flabel">Площадь м²</label><input class="finput" id="f-area" type="number" placeholder="120"></div>
+      <div class="stat-card">
+        <div class="stat-card-num" id="stat-rent">—</div>
+        <div class="stat-card-label">В аренду</div>
       </div>
-      <div class="fg"><label class="flabel">Описание</label><textarea class="ftextarea" id="f-desc" placeholder="Описание объекта..."></textarea></div>
-      <div class="fg">
-        <label class="flabel">Ссылка на фото *</label>
-        <input class="finput" id="f-img" placeholder="https://images.unsplash.com/...">
-        <div class="img-tip">
-          Бесплатные фото: <a href="https://unsplash.com" target="_blank">unsplash.com</a><br>
-          Открой фото → нажми Download → Copy link
-        </div>
+      <div class="stat-card">
+        <div class="stat-card-num" id="stat-sold">—</div>
+        <div class="stat-card-label">Продано / Сдано</div>
       </div>
-      <div class="fg"><label class="flabel">Удобства (через запятую)</label><input class="finput" id="f-amen" placeholder="Бассейн, Гараж, Вид на море"></div>
-
-      <button class="add-btn" id="add-btn">+ Добавить на сайт</button>
-      <div class="f-ok" id="f-ok"></div>
     </div>
 
-    <!-- MAIN -->
-    <div class="adm-main">
+    <!-- Уведомление настройки -->
+    <div class="setup-notice" id="setup-notice">
+      <div class="setup-notice-title">⚙ Нужно подключить Firebase — иначе изменения видны только вам</div>
+      <div class="setup-notice-text">
+        Инструкция в файле <b>firebase-config.js</b>. Займёт 5 минут:
+        <ol>
+          <li>Зайди на <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → создай проект</li>
+          <li>Realtime Database → Create database → выбери <b>test mode</b></li>
+          <li>Настройки ⚙ → Your apps → &lt;/&gt; → скопируй <b>firebaseConfig</b></li>
+          <li>Вставь данные в файл <b>firebase-config.js</b> → загрузи на сайт</li>
+        </ol>
+      </div>
+    </div>
 
-      <!-- Баннер настройки Firebase -->
-      <div id="setup-banner">
-        <div class="setup-title">⚙️ Нужно подключить базу данных Firebase</div>
-        <div class="setup-text">
-          Сейчас объекты видны только тебе. Чтобы клиенты видели изменения — настрой Firebase (5 минут, бесплатно):
-          <ol>
-            <li>Зайди на <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li>
-            <li>Создай проект → <b>Realtime Database</b> → <b>Create database</b> → выбери <b>test mode</b></li>
-            <li>Нажми ⚙️ <b>Project settings</b> → <b>Your apps</b> → нажми &lt;/&gt; → дай имя → <b>Register</b></li>
-            <li>Скопируй данные <b>firebaseConfig</b> и вставь в файл <b>firebase-config.js</b></li>
-            <li>Сохрани файл и перезагрузи эту страницу</li>
-          </ol>
+    <!-- Два столбца: форма + список -->
+    <div class="two-col">
+
+      <!-- ── ФОРМА ДОБАВЛЕНИЯ ── -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Добавить новый объект</div>
+        </div>
+        <div class="card-body">
+
+          <!-- Тип -->
+          <div class="field-group">
+            <label class="field-label">Тип объекта <span class="field-required">*</span></label>
+            <div class="toggle-group">
+              <button class="toggle-btn active" data-type="apartment" id="type-apt">🏢 Квартира</button>
+              <button class="toggle-btn" data-type="house" id="type-house">🏡 Дом / Вилла</button>
+            </div>
+          </div>
+
+          <!-- Тип сделки -->
+          <div class="field-group">
+            <label class="field-label">Тип сделки <span class="field-required">*</span></label>
+            <div class="toggle-group">
+              <button class="toggle-btn active" data-deal="buy" id="deal-buy">💶 Продажа</button>
+              <button class="toggle-btn" data-deal="rent" id="deal-rent">🔑 Аренда</button>
+            </div>
+          </div>
+
+          <!-- Название -->
+          <div class="field-group">
+            <label class="field-label">Название объекта <span class="field-required">*</span></label>
+            <input class="field-input" id="f-name" placeholder='Например: Вилла «Лагуна»'>
+          </div>
+
+          <!-- Локация -->
+          <div class="field-group">
+            <label class="field-label">Расположение <span class="field-required">*</span></label>
+            <input class="field-input" id="f-loc" placeholder="Например: Torrevieja, Costa Blanca">
+          </div>
+
+          <!-- Цена -->
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Цена в € <span class="field-required">*</span></label>
+              <input class="field-input" id="f-price" type="number" placeholder="285000">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Как показать цену</label>
+              <input class="field-input" id="f-price-txt" placeholder="€ 285 000">
+              <div class="field-hint">Оставь пустым — заполнится автоматически</div>
+            </div>
+          </div>
+
+          <!-- Характеристики -->
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Спален</label>
+              <input class="field-input" id="f-beds" type="number" placeholder="3">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Площадь м²</label>
+              <input class="field-input" id="f-area" type="number" placeholder="120">
+            </div>
+          </div>
+
+          <!-- Описание -->
+          <div class="field-group">
+            <label class="field-label">Описание объекта</label>
+            <textarea class="field-textarea" id="f-desc" placeholder="Опишите объект: чем он хорош, что рядом, особенности..."></textarea>
+          </div>
+
+          <!-- Фото -->
+          <div class="field-group">
+            <label class="field-label">Ссылка на фотографию <span class="field-required">*</span></label>
+            <input class="field-input" id="f-img" placeholder="https://images.unsplash.com/photo-..." oninput="previewImg(this.value,'add-preview')">
+            <img class="img-preview" id="add-preview" alt="Предпросмотр фото">
+            <div class="field-hint">
+              Бесплатные фото: <a href="https://unsplash.com" target="_blank">unsplash.com</a> — нажми на фото → Download → Copy link и вставь сюда
+            </div>
+          </div>
+
+          <!-- Удобства -->
+          <div class="field-group">
+            <label class="field-label">Удобства</label>
+            <input class="field-input" id="f-amen" placeholder="Бассейн, Гараж, Вид на море, Кондиционеры">
+            <div class="field-hint">Вводи через запятую</div>
+          </div>
+
+          <button class="submit-btn" id="add-btn">+ Опубликовать объект на сайте</button>
+          <div class="form-msg" id="form-msg"></div>
         </div>
       </div>
 
-      <div class="main-top">
-        <div class="main-title">Объекты на сайте</div>
-        <div class="stats-row" id="stats-row">
-          <div class="s-chip"><b>—</b>всего</div>
+      <!-- ── СПИСОК ОБЪЕКТОВ ── -->
+      <div>
+        <div class="listings-header">
+          <div class="listings-title" id="listings-count">Объекты на сайте</div>
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-f="active">Активные</button>
+            <button class="filter-tab" data-f="buy">Продажа</button>
+            <button class="filter-tab" data-f="rent">Аренда</button>
+            <button class="filter-tab" data-f="sold">Проданные</button>
+          </div>
+        </div>
+        <div class="prop-cards" id="prop-cards">
+          <div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Загрузка...</div></div>
         </div>
       </div>
 
-      <div class="f-row">
-        <button class="fc active" data-f="all">Все активные</button>
-        <button class="fc" data-f="buy">Продажа</button>
-        <button class="fc" data-f="rent">Аренда</button>
-        <button class="fc" data-f="sold">Проданные / Сданные</button>
-      </div>
-
-      <div class="prop-list" id="prop-list">
-        <div class="empty-st"><div class="empty-st-ic">⏳</div><div class="empty-st-tx">Загрузка...</div></div>
-      </div>
     </div>
   </div>
 </div>
 
-<!-- EDIT MODAL -->
-<div id="edit-modal">
-  <div class="mbox">
-    <div class="m-title">Редактировать объект</div>
-    <input type="hidden" id="e-id">
-    <div class="fg"><label class="flabel">Название (RU)</label><input class="finput" id="e-name-ru"></div>
-    <div class="fg"><label class="flabel">Название (EN)</label><input class="finput" id="e-name-en"></div>
-    <div class="fg"><label class="flabel">Название (ES)</label><input class="finput" id="e-name-es"></div>
-    <div class="fg"><label class="flabel">Локация</label><input class="finput" id="e-loc"></div>
-    <div class="frow">
-      <div class="fg"><label class="flabel">Тип</label><select class="fselect" id="e-type"><option value="apartment">Квартира</option><option value="house">Дом/Вилла</option></select></div>
-      <div class="fg"><label class="flabel">Сделка</label><select class="fselect" id="e-deal"><option value="buy">Продажа</option><option value="rent">Аренда</option></select></div>
+<!-- ══ EDIT MODAL ══ -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Редактировать объект</div>
+      <button class="modal-close" id="modal-close">✕</button>
     </div>
-    <div class="frow">
-      <div class="fg"><label class="flabel">Цена (число)</label><input class="finput" id="e-price" type="number"></div>
-      <div class="fg"><label class="flabel">Цена (текст)</label><input class="finput" id="e-price-txt"></div>
+    <div class="modal-body">
+      <input type="hidden" id="e-id">
+      <div class="field-group">
+        <label class="field-label">Название</label>
+        <input class="field-input" id="e-name">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Расположение</label>
+        <input class="field-input" id="e-loc">
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Тип объекта</label>
+          <select class="field-select" id="e-type">
+            <option value="apartment">Квартира / Апартаменты</option>
+            <option value="house">Дом / Вилла</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Тип сделки</label>
+          <select class="field-select" id="e-deal">
+            <option value="buy">Продажа</option>
+            <option value="rent">Аренда</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Цена (число €)</label>
+          <input class="field-input" id="e-price" type="number">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Цена (текст)</label>
+          <input class="field-input" id="e-price-txt">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Спален</label>
+          <input class="field-input" id="e-beds" type="number">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Площадь м²</label>
+          <input class="field-input" id="e-area" type="number">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Описание</label>
+        <textarea class="field-textarea" id="e-desc"></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Ссылка на фото</label>
+        <input class="field-input" id="e-img" oninput="previewImg(this.value,'e-preview')">
+        <img class="img-preview" id="e-preview" alt="Предпросмотр">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Удобства (через запятую)</label>
+        <input class="field-input" id="e-amen">
+      </div>
     </div>
-    <div class="frow">
-      <div class="fg"><label class="flabel">Спален</label><input class="finput" id="e-beds" type="number"></div>
-      <div class="fg"><label class="flabel">Площадь м²</label><input class="finput" id="e-area" type="number"></div>
-    </div>
-    <div class="fg"><label class="flabel">Описание</label><textarea class="ftextarea" id="e-desc"></textarea></div>
-    <div class="fg"><label class="flabel">Ссылка на фото</label><input class="finput" id="e-img"></div>
-    <div class="fg"><label class="flabel">Удобства (через запятую)</label><input class="finput" id="e-amen"></div>
-    <div class="m-footer">
-      <button class="m-cancel" id="m-cancel">Отмена</button>
-      <button class="m-save" id="m-save">Сохранить изменения</button>
+    <div class="modal-footer">
+      <button class="modal-cancel" id="modal-cancel">Отмена</button>
+      <button class="modal-save" id="modal-save">Сохранить изменения →</button>
     </div>
   </div>
 </div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"></div>
 
 <script src="firebase-config.js"></script>
 <script>
-/* ══════════════════════════════════════════════
-   HAVEN ADMIN — Firebase Realtime Database
-══════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   HAVEN ADMIN — полное управление без кода
+   Данные: Firebase Realtime Database (если настроен)
+          или localStorage (если Firebase не настроен)
+════════════════════════════════════════════════════════════ */
 
-var LOGIN = 'admin';
-var PASS  = 'haven2024'; // ← смени на свой пароль
+var ADMIN_LOGIN = 'admin';
+var ADMIN_PASS  = 'haven2024'; // ← смени здесь
 
 var db = null;
-var allProps = {};
-var curFilter = 'all';
-var isConfigured = false;
+var props = {};
+var curFilter = 'active';
+var addType = 'apartment';
+var addDeal = 'buy';
+var fbOk = false;
 
-/* ── ПРОВЕРКА КОНФИГА ── */
-function checkConfig() {
-  if (!window.FIREBASE_CONFIG) return false;
-  var cfg = window.FIREBASE_CONFIG;
-  return cfg.apiKey && cfg.apiKey !== 'ВСТАВЬ_СЮДА' && cfg.databaseURL && cfg.databaseURL !== 'ВСТАВЬ_СЮДА';
-}
+/* ─── AUTH ─── */
+document.getElementById('l-submit').addEventListener('click', tryLogin);
+['l-user','l-pass'].forEach(function(id){
+  document.getElementById(id).addEventListener('keydown', function(e){ if(e.key==='Enter') tryLogin(); });
+});
 
-/* ── ИНИЦИАЛИЗАЦИЯ FIREBASE ── */
-function initFirebase() {
-  isConfigured = checkConfig();
-
-  if (!isConfigured) {
-    document.getElementById('setup-banner').classList.add('show');
-    setStatus('err', '⚠ Firebase не настроен');
-    renderEmpty();
-    return;
-  }
-
-  try {
-    if (!firebase.apps.length) {
-      firebase.initializeApp(window.FIREBASE_CONFIG);
-    }
-    db = firebase.database();
-    setStatus('loading', '⏳ Подключение...');
-
-    // Слушаем изменения в реальном времени
-    db.ref('properties').on('value', function(snapshot) {
-      allProps = snapshot.val() || {};
-      setStatus('ok', '🟢 База данных подключена');
-      renderAll();
-    }, function(error) {
-      setStatus('err', '❌ Ошибка: ' + error.message);
-    });
-
-  } catch(e) {
-    setStatus('err', '❌ ' + e.message);
-  }
-}
-
-function setStatus(type, text) {
-  var el = document.getElementById('db-status');
-  el.className = 'db-status ' + type;
-  el.textContent = text;
-}
-
-/* ── AUTH ── */
-document.getElementById('l-btn').addEventListener('click', tryLogin);
-document.getElementById('l-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') tryLogin(); });
-
-function tryLogin() {
-  if (document.getElementById('l-user').value.trim() === LOGIN &&
-      document.getElementById('l-pass').value === PASS) {
+function tryLogin(){
+  var u = document.getElementById('l-user').value.trim();
+  var p = document.getElementById('l-pass').value;
+  if(u === ADMIN_LOGIN && p === ADMIN_PASS){
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('admin-panel').style.display = 'block';
-    initFirebase();
+    document.getElementById('admin-panel').style.display  = 'block';
+    initStorage();
   } else {
     document.getElementById('l-err').textContent = 'Неверный логин или пароль';
     document.getElementById('l-pass').value = '';
+    setTimeout(function(){ document.getElementById('l-err').textContent=''; }, 3000);
   }
 }
 
 document.getElementById('logout-btn').addEventListener('click', function(){
-  if (db) db.ref('properties').off(); // отключаем слушатель
-  document.getElementById('admin-panel').style.display = 'none';
+  if(db) db.ref('properties').off();
+  document.getElementById('admin-panel').style.display  = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('l-pass').value = '';
-  document.getElementById('l-err').textContent = '';
 });
 
-/* ── РЕНДЕР ── */
-function renderAll() { renderStats(); renderList(); }
-
-function renderEmpty() {
-  document.getElementById('prop-list').innerHTML =
-    '<div class="empty-st"><div class="empty-st-ic">🏠</div>' +
-    '<div class="empty-st-tx">Настройте Firebase чтобы начать добавлять объекты</div></div>';
+/* ─── STORAGE: Firebase или localStorage ─── */
+function isFirebaseConfigured(){
+  if(!window.FIREBASE_CONFIG) return false;
+  var c = window.FIREBASE_CONFIG;
+  return c.apiKey && c.apiKey !== 'ВСТАВЬ_СЮДА' && c.databaseURL && c.databaseURL !== 'ВСТАВЬ_СЮДА';
 }
 
-function renderStats() {
-  var arr = Object.values(allProps);
-  var active = arr.filter(function(p){ return !p.sold; });
-  document.getElementById('stats-row').innerHTML =
-    '<div class="s-chip"><b>'+arr.length+'</b>всего</div>' +
-    '<div class="s-chip"><b>'+active.filter(function(p){return p.deal==='buy';}).length+'</b>продажа</div>' +
-    '<div class="s-chip"><b>'+active.filter(function(p){return p.deal==='rent';}).length+'</b>аренда</div>' +
-    '<div class="s-chip"><b>'+arr.filter(function(p){return p.sold;}).length+'</b>продано/сдано</div>';
+function initStorage(){
+  setDbStatus('loading');
+  if(isFirebaseConfigured()){
+    try{
+      if(!firebase.apps.length) firebase.initializeApp(window.FIREBASE_CONFIG);
+      db = firebase.database();
+      db.ref('properties').on('value', function(snap){
+        props = snap.val() || {};
+        fbOk = true;
+        setDbStatus('ok');
+        renderAll();
+      }, function(err){
+        setDbStatus('err');
+        toast('Ошибка Firebase: ' + err.message, true);
+        fallbackLocal();
+      });
+    } catch(e){
+      setDbStatus('err');
+      fallbackLocal();
+    }
+  } else {
+    document.getElementById('setup-notice').classList.add('show');
+    setDbStatus('warn');
+    fallbackLocal();
+  }
 }
 
-function renderList() {
-  var arr = Object.values(allProps).sort(function(a,b){
-    return (b.createdAt||0) - (a.createdAt||0);
-  });
+function fallbackLocal(){
+  try{ props = JSON.parse(localStorage.getItem('haven_props')) || {}; } catch(e){ props={}; }
+  renderAll();
+}
 
-  var filtered = arr.filter(function(p){
-    if (curFilter === 'all')  return !p.sold;
-    if (curFilter === 'buy')  return p.deal==='buy' && !p.sold;
-    if (curFilter === 'rent') return p.deal==='rent' && !p.sold;
-    if (curFilter === 'sold') return p.sold;
+function saveLocal(){ localStorage.setItem('haven_props', JSON.stringify(props)); }
+
+function setDbStatus(s){
+  var dot   = document.getElementById('db-dot');
+  var label = document.getElementById('db-label');
+  dot.className = 'db-dot';
+  if(s==='ok')      { dot.classList.add('green'); label.textContent = '● База данных подключена'; }
+  else if(s==='err'){ dot.classList.add('red');   label.textContent = '● Ошибка подключения'; }
+  else if(s==='warn'){ label.textContent = '● Работает локально'; }
+  else              { label.textContent = 'Подключение...'; }
+}
+
+/* ─── WRITE HELPERS ─── */
+function writeProp(id, data, cb){
+  if(fbOk && db){
+    db.ref('properties/'+id).set(data).then(cb).catch(function(e){ toast(e.message,true); });
+  } else {
+    props[id] = data; saveLocal(); renderAll(); if(cb) cb();
+  }
+}
+
+function updateProp(id, data, cb){
+  if(fbOk && db){
+    db.ref('properties/'+id).update(data).then(cb).catch(function(e){ toast(e.message,true); });
+  } else {
+    Object.assign(props[id], data); saveLocal(); renderAll(); if(cb) cb();
+  }
+}
+
+function deletePropDB(id, cb){
+  if(fbOk && db){
+    db.ref('properties/'+id).remove().then(cb).catch(function(e){ toast(e.message,true); });
+  } else {
+    delete props[id]; saveLocal(); renderAll(); if(cb) cb();
+  }
+}
+
+/* ─── RENDER ─── */
+function renderAll(){ renderStats(); renderCards(); }
+
+function renderStats(){
+  var all  = Object.values(props);
+  var act  = all.filter(function(p){ return !p.sold; });
+  document.getElementById('stat-total').textContent = all.length;
+  document.getElementById('stat-sale').textContent  = act.filter(function(p){ return p.deal==='buy'; }).length;
+  document.getElementById('stat-rent').textContent  = act.filter(function(p){ return p.deal==='rent'; }).length;
+  document.getElementById('stat-sold').textContent  = all.filter(function(p){ return p.sold; }).length;
+}
+
+function renderCards(){
+  var all = Object.values(props).sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); });
+  var filtered = all.filter(function(p){
+    if(curFilter==='active') return !p.sold;
+    if(curFilter==='buy')    return p.deal==='buy' && !p.sold;
+    if(curFilter==='rent')   return p.deal==='rent' && !p.sold;
+    if(curFilter==='sold')   return p.sold;
     return true;
   });
 
-  var c = document.getElementById('prop-list');
+  document.getElementById('listings-count').textContent =
+    'Объекты на сайте (' + filtered.length + ')';
 
-  if (!filtered.length) {
-    c.innerHTML = '<div class="empty-st"><div class="empty-st-ic">🏠</div>' +
-      '<div class="empty-st-tx">' +
-      (curFilter==='sold' ? 'Нет проданных/сданных объектов' : 'Нет объектов — добавьте первый!') +
+  var c = document.getElementById('prop-cards');
+  if(!filtered.length){
+    c.innerHTML = '<div class="empty-state"><div class="empty-icon">🏠</div><div class="empty-text">' +
+      (curFilter==='sold' ? 'Нет проданных / сданных объектов' : 'Нет объектов. Добавьте первый!') +
       '</div></div>';
     return;
   }
 
   c.innerHTML = '';
-  filtered.forEach(function(p) {
-    var row = document.createElement('div');
-    row.className = 'prow' + (p.sold ? ' sold' : '');
+  filtered.forEach(function(p){
+    var card = document.createElement('div');
+    card.className = 'prop-card' + (p.sold ? ' is-sold' : '');
+
     var imgHtml = p.img
-      ? '<img class="pthumb" src="'+p.img+'" onerror="this.parentNode.innerHTML=\'<div class=pthumb-ph>🏠</div>\'">'
-      : '<div class="pthumb-ph">🏠</div>';
-    var bdg = p.sold
-      ? '<span class="pbadge sold-b">Продано/Сдано</span>'
-      : '<span class="pbadge '+(p.deal==='buy'?'buy':'rent')+'">'+(p.deal==='buy'?'Продажа':'Аренда')+'</span>';
-    var dateStr = p.createdAt ? new Date(p.createdAt).toLocaleDateString('ru-RU') : '';
+      ? '<img class="prop-img" src="'+p.img+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">' +
+        '<div class="prop-img-ph" style="display:none">🏠</div>'
+      : '<div class="prop-img-ph">🏠</div>';
 
-    row.innerHTML =
+    var badge = p.sold
+      ? '<span class="badge badge-sold">Продано/Сдано</span>'
+      : '<span class="badge '+(p.deal==='buy'?'badge-buy':'badge-rent')+'">'+(p.deal==='buy'?'Продажа':'Аренда')+'</span>';
+
+    var togLabel = p.sold ? '↩ Вернуть' : '✓ Продано';
+
+    card.innerHTML =
       imgHtml +
-      '<div class="pinfo">' +
-        '<div class="pname">'+(p.nameRu||'—')+'</div>' +
-        '<div class="pmeta">' + bdg +
-          '<span>'+(p.type==='house'?'Дом/Вилла':'Квартира')+'</span>' +
-          '<span>📍 '+(p.location||'—')+'</span>' +
-          '<span>'+(p.beds||'?')+' сп · '+(p.area||'?')+' м²</span>' +
+      '<div class="prop-body">' +
+        '<div class="prop-info">' +
+          '<div class="prop-name">' + (p.name||'—') + '</div>' +
+          '<div class="prop-meta">' + badge +
+            '<span>'+(p.type==='house'?'Дом/Вилла':'Квартира')+'</span>' +
+            '<span>📍'+(p.location||'—')+'</span>' +
+            '<span>'+(p.beds||'?')+' сп · '+(p.area||'?')+' м²</span>' +
+          '</div>' +
+          '<div class="prop-price">'+(p.priceDisplay||'€ —')+'</div>' +
         '</div>' +
-        '<div class="pprice">'+(p.priceDisplay||'€ —')+'</div>' +
-        (dateStr ? '<div class="pdate">Добавлен: '+dateStr+'</div>' : '') +
-      '</div>' +
-      '<div class="pactions">' +
-        '<button class="abtn abtn-edit" data-id="'+p.id+'">✏ Изменить</button>' +
-        '<button class="abtn abtn-tog" data-id="'+p.id+'">'+(p.sold?'↩ Вернуть в продажу':'✓ Продано/Сдано')+'</button>' +
-        '<button class="abtn abtn-del" data-id="'+p.id+'">✕ Удалить</button>' +
+        '<div class="prop-actions">' +
+          '<button class="act act-edit" data-id="'+p.id+'">✏ Изменить</button>' +
+          '<button class="act act-sold" data-id="'+p.id+'">'+togLabel+'</button>' +
+          '<button class="act act-delete" data-id="'+p.id+'">✕ Удалить</button>' +
+        '</div>' +
       '</div>';
-    c.appendChild(row);
+    c.appendChild(card);
   });
 
-  c.querySelectorAll('.abtn-edit').forEach(function(b){
-    b.addEventListener('click', function(){ openEdit(b.getAttribute('data-id')); });
-  });
-  c.querySelectorAll('.abtn-tog').forEach(function(b){
-    b.addEventListener('click', function(){ toggleSold(b.getAttribute('data-id')); });
-  });
-  c.querySelectorAll('.abtn-del').forEach(function(b){
-    b.addEventListener('click', function(){ deleteProp(b.getAttribute('data-id')); });
-  });
+  c.querySelectorAll('.act-edit').forEach(function(b){
+    b.addEventListener('click', function(){ openEditModal(b.getAttribute('data-id')); }); });
+  c.querySelectorAll('.act-sold').forEach(function(b){
+    b.addEventListener('click', function(){ toggleSold(b.getAttribute('data-id')); }); });
+  c.querySelectorAll('.act-delete').forEach(function(b){
+    b.addEventListener('click', function(){ deleteConfirm(b.getAttribute('data-id')); }); });
 }
 
-/* ── FILTER TABS ── */
-document.querySelectorAll('.fc').forEach(function(btn){
+/* ─── FILTER TABS ─── */
+document.querySelectorAll('.filter-tab').forEach(function(btn){
   btn.addEventListener('click', function(){
-    document.querySelectorAll('.fc').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.filter-tab').forEach(function(b){ b.classList.remove('active'); });
     btn.classList.add('active');
     curFilter = btn.getAttribute('data-f');
-    renderList();
+    renderCards();
   });
 });
 
-/* ── ADD PROPERTY ── */
-document.getElementById('add-btn').addEventListener('click', function(){
-  if (!isConfigured) {
-    showOk('err', '⚠ Сначала настройте Firebase!'); return;
-  }
-  var nameRu   = document.getElementById('f-name-ru').value.trim();
-  var loc      = document.getElementById('f-loc').value.trim();
-  var priceNum = parseFloat(document.getElementById('f-price').value) || 0;
+/* ─── TYPE / DEAL TOGGLES ─── */
+document.querySelectorAll('[data-type]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('[data-type]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    addType = btn.getAttribute('data-type');
+  });
+});
+document.querySelectorAll('[data-deal]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('[data-deal]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    addDeal = btn.getAttribute('data-deal');
+  });
+});
 
-  if (!nameRu || !loc || !priceNum) {
-    showOk('err', 'Заполните: название, локацию и цену'); return;
+/* ─── ADD PROPERTY ─── */
+document.getElementById('add-btn').addEventListener('click', addProperty);
+
+function addProperty(){
+  var name     = document.getElementById('f-name').value.trim();
+  var loc      = document.getElementById('f-loc').value.trim();
+  var priceNum = parseFloat(document.getElementById('f-price').value)||0;
+
+  if(!name || !loc || !priceNum){
+    setFormMsg('Заполните: название, расположение и цену', true);
+    return;
   }
 
   var priceTxt = document.getElementById('f-price-txt').value.trim() ||
                  ('€ ' + priceNum.toLocaleString('de-DE'));
   var amenStr  = document.getElementById('f-amen').value.trim();
-  var newId    = 'p' + Date.now();
+  var id       = 'p' + Date.now();
 
   var newProp = {
-    id:           newId,
-    nameRu:       nameRu,
-    nameEn:       document.getElementById('f-name-en').value.trim() || nameRu,
-    nameEs:       document.getElementById('f-name-es').value.trim() || nameRu,
+    id:           id,
+    name:         name,
     location:     loc,
-    type:         document.getElementById('f-type').value,
-    deal:         document.getElementById('f-deal').value,
+    type:         addType,
+    deal:         addDeal,
     priceNum:     priceNum,
     priceDisplay: priceTxt,
     beds:         document.getElementById('f-beds').value.trim(),
@@ -482,97 +708,129 @@ document.getElementById('add-btn').addEventListener('click', function(){
     createdAt:    Date.now()
   };
 
-  // Записываем в Firebase — сразу видно на сайте!
-  db.ref('properties/' + newId).set(newProp)
-    .then(function(){
-      ['f-name-ru','f-name-en','f-name-es','f-loc','f-price','f-price-txt',
-       'f-beds','f-area','f-desc','f-img','f-amen'].forEach(function(id){
-        document.getElementById(id).value = '';
-      });
-      showOk('ok', '✓ Объект «'+nameRu+'» добавлен! Клиенты уже видят его.');
-    })
-    .catch(function(e){ showOk('err', 'Ошибка: ' + e.message); });
-});
+  document.getElementById('add-btn').disabled = true;
+  writeProp(id, newProp, function(){
+    clearAddForm();
+    document.getElementById('add-btn').disabled = false;
+    setFormMsg('✓ Объект «'+name+'» опубликован на сайте!', false);
+    toast('✓ «'+name+'» добавлен на сайт');
+    setTimeout(function(){ setFormMsg('',false); }, 4000);
+  });
+}
 
-function showOk(type, text){
-  var el = document.getElementById('f-ok');
-  el.style.color = type==='ok' ? '#7ab87a' : '#c47070';
+function clearAddForm(){
+  ['f-name','f-loc','f-price','f-price-txt','f-beds','f-area','f-desc','f-img','f-amen'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('add-preview').classList.remove('show');
+  addType = 'apartment'; addDeal = 'buy';
+  document.querySelectorAll('[data-type]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-type')==='apartment'); });
+  document.querySelectorAll('[data-deal]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-deal')==='buy'); });
+}
+
+function setFormMsg(text, isErr){
+  var el = document.getElementById('form-msg');
+  el.style.color = isErr ? '#c47070' : '#4a7a4a';
   el.textContent = text;
-  setTimeout(function(){ el.textContent=''; }, 4000);
 }
 
-/* ── DELETE ── */
-function deleteProp(id) {
-  if (!confirm('Удалить объект? Клиенты сразу перестанут его видеть.')) return;
-  db.ref('properties/' + id).remove()
-    .catch(function(e){ alert('Ошибка: ' + e.message); });
+/* ─── DELETE ─── */
+function deleteConfirm(id){
+  var p = props[id];
+  var name = p ? p.name : 'этот объект';
+  if(!confirm('Удалить «'+name+'»?\n\nОн сразу исчезнет с сайта для всех клиентов.\nЭто действие нельзя отменить.')) return;
+  deletePropDB(id, function(){
+    toast('«'+name+'» удалён с сайта');
+  });
 }
 
-/* ── TOGGLE SOLD ── */
-function toggleSold(id) {
-  var p = allProps[id];
-  if (!p) return;
-  var newVal = !p.sold;
-  var msg = newVal
-    ? 'Пометить как «Продано/Сдано»? Объект исчезнет с сайта для клиентов.'
-    : 'Вернуть объект в активные? Клиенты снова его увидят.';
-  if (!confirm(msg)) return;
-  db.ref('properties/' + id + '/sold').set(newVal)
-    .catch(function(e){ alert('Ошибка: ' + e.message); });
+/* ─── TOGGLE SOLD ─── */
+function toggleSold(id){
+  var p = props[id];
+  if(!p) return;
+  var newSold = !p.sold;
+  var msg = newSold
+    ? '«'+p.name+'» — пометить как «Продано / Сдано»?\n\nОбъект скроется с сайта для клиентов.'
+    : '«'+p.name+'» — вернуть в активные?\n\nКлиенты снова увидят его на сайте.';
+  if(!confirm(msg)) return;
+  updateProp(id, { sold: newSold }, function(){
+    toast(newSold ? '«'+p.name+'» скрыт с сайта' : '«'+p.name+'» снова на сайте');
+  });
 }
 
-/* ── EDIT MODAL ── */
-function openEdit(id) {
-  var p = allProps[id];
-  if (!p) return;
-  document.getElementById('e-id').value         = id;
-  document.getElementById('e-name-ru').value    = p.nameRu  || '';
-  document.getElementById('e-name-en').value    = p.nameEn  || '';
-  document.getElementById('e-name-es').value    = p.nameEs  || '';
-  document.getElementById('e-loc').value        = p.location|| '';
-  document.getElementById('e-type').value       = p.type    || 'apartment';
-  document.getElementById('e-deal').value       = p.deal    || 'buy';
-  document.getElementById('e-price').value      = p.priceNum|| '';
-  document.getElementById('e-price-txt').value  = p.priceDisplay || '';
-  document.getElementById('e-beds').value       = p.beds    || '';
-  document.getElementById('e-area').value       = p.area    || '';
-  document.getElementById('e-desc').value       = p.desc    || '';
-  document.getElementById('e-img').value        = p.img     || '';
-  document.getElementById('e-amen').value       = (p.amenities||[]).join(', ');
-  document.getElementById('edit-modal').classList.add('active');
+/* ─── EDIT MODAL ─── */
+function openEditModal(id){
+  var p = props[id];
+  if(!p) return;
+  document.getElementById('e-id').value       = id;
+  document.getElementById('e-name').value     = p.name||'';
+  document.getElementById('e-loc').value      = p.location||'';
+  document.getElementById('e-type').value     = p.type||'apartment';
+  document.getElementById('e-deal').value     = p.deal||'buy';
+  document.getElementById('e-price').value    = p.priceNum||'';
+  document.getElementById('e-price-txt').value= p.priceDisplay||'';
+  document.getElementById('e-beds').value     = p.beds||'';
+  document.getElementById('e-area').value     = p.area||'';
+  document.getElementById('e-desc').value     = p.desc||'';
+  document.getElementById('e-img').value      = p.img||'';
+  document.getElementById('e-amen').value     = (p.amenities||[]).join(', ');
+  previewImg(p.img||'', 'e-preview');
+  document.getElementById('edit-modal').classList.add('open');
 }
 
-document.getElementById('m-cancel').addEventListener('click', function(){
-  document.getElementById('edit-modal').classList.remove('active');
-});
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-cancel').addEventListener('click', closeModal);
 document.getElementById('edit-modal').addEventListener('click', function(e){
-  if (e.target === this) this.classList.remove('active');
+  if(e.target===this) closeModal();
 });
+function closeModal(){ document.getElementById('edit-modal').classList.remove('open'); }
 
-document.getElementById('m-save').addEventListener('click', function(){
-  var id = document.getElementById('e-id').value;
+document.getElementById('modal-save').addEventListener('click', function(){
+  var id  = document.getElementById('e-id').value;
   var amenStr = document.getElementById('e-amen').value.trim();
+  var priceNum = parseFloat(document.getElementById('e-price').value)||0;
+  var priceTxt = document.getElementById('e-price-txt').value.trim() ||
+                 (priceNum ? '€ '+priceNum.toLocaleString('de-DE') : '');
   var updates = {
-    nameRu:       document.getElementById('e-name-ru').value.trim(),
-    nameEn:       document.getElementById('e-name-en').value.trim(),
-    nameEs:       document.getElementById('e-name-es').value.trim(),
+    name:         document.getElementById('e-name').value.trim(),
     location:     document.getElementById('e-loc').value.trim(),
     type:         document.getElementById('e-type').value,
     deal:         document.getElementById('e-deal').value,
-    priceNum:     parseFloat(document.getElementById('e-price').value)||0,
-    priceDisplay: document.getElementById('e-price-txt').value.trim(),
+    priceNum:     priceNum,
+    priceDisplay: priceTxt,
     beds:         document.getElementById('e-beds').value.trim(),
     area:         document.getElementById('e-area').value.trim(),
     desc:         document.getElementById('e-desc').value.trim(),
     img:          document.getElementById('e-img').value.trim(),
     amenities:    amenStr ? amenStr.split(',').map(function(s){return s.trim();}) : []
   };
-  db.ref('properties/' + id).update(updates)
-    .then(function(){
-      document.getElementById('edit-modal').classList.remove('active');
-    })
-    .catch(function(e){ alert('Ошибка: ' + e.message); });
+  updateProp(id, updates, function(){
+    closeModal();
+    toast('Изменения сохранены');
+  });
 });
+
+/* ─── PREVIEW IMAGE ─── */
+function previewImg(url, targetId){
+  var img = document.getElementById(targetId);
+  if(!img) return;
+  if(url && url.startsWith('http')){
+    img.src = url;
+    img.classList.add('show');
+    img.onerror = function(){ img.classList.remove('show'); };
+  } else {
+    img.classList.remove('show');
+  }
+}
+
+/* ─── TOAST ─── */
+function toast(msg, isErr){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = isErr ? '#8B3A3A' : '#1A1714';
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 3000);
+}
 </script>
 </body>
 </html>

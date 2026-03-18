@@ -301,8 +301,14 @@ window.havenLoadFirebaseProps = function(callback) {
   }
 };
 
-/* Конвертируем объект из Firebase в формат HAVEN_PROPERTIES */
+/* Конвертируем объект из admin в формат HAVEN_PROPERTIES */
 window.havenConvertProp = function(p) {
+  // admin.html сохраняет: p.name, p.location, p.desc, p.img, p.beds, p.area
+  // старый формат использовал: p.nameRu, p.nameEn — поддерживаем оба
+  var nameRu = p.name || p.nameRu || p.nameEn || 'Объект';
+  var nameEn = p.nameEn || p.name || nameRu;
+  var nameEs = p.nameEs || p.name || nameRu;
+
   return {
     id: p.id,
     type: p.type || 'apartment',
@@ -316,7 +322,7 @@ window.havenConvertProp = function(p) {
     ru: {
       badge: p.deal === 'rent' ? 'Аренда' : 'Продажа',
       bc: p.deal === 'rent' ? 'rent' : '',
-      name: p.nameRu || p.nameEn || 'Объект',
+      name: nameRu,
       loc:  p.location || '—',
       price: p.priceDisplay || ('€ ' + (p.priceNum||0).toLocaleString('de-DE')),
       priceNote: '',
@@ -342,7 +348,7 @@ window.havenConvertProp = function(p) {
     en: {
       badge: p.deal === 'rent' ? 'For Rent' : 'For Sale',
       bc: p.deal === 'rent' ? 'rent' : '',
-      name: p.nameEn || p.nameRu || 'Property',
+      name: nameEn,
       loc:  p.location || '—',
       price: p.priceDisplay || ('€ ' + (p.priceNum||0).toLocaleString('de-DE')),
       priceNote: '',
@@ -368,7 +374,7 @@ window.havenConvertProp = function(p) {
     es: {
       badge: p.deal === 'rent' ? 'Alquiler' : 'En Venta',
       bc: p.deal === 'rent' ? 'rent' : '',
-      name: p.nameEs || p.nameRu || 'Propiedad',
+      name: nameEs,
       loc:  p.location || '—',
       price: p.priceDisplay || ('€ ' + (p.priceNum||0).toLocaleString('de-DE')),
       priceNote: '',
@@ -393,3 +399,4 @@ window.havenConvertProp = function(p) {
     }
   };
 };
+

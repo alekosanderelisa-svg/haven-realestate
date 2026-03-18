@@ -15,13 +15,13 @@
    ============================================================ */
 
 var FIREBASE_CONFIG = {
-  apiKey:            "ВСТАВЬ_СЮДА",        // apiKey
-  authDomain:        "ВСТАВЬ_СЮДА",        // authDomain
-  databaseURL:       "ВСТАВЬ_СЮДА",        // databaseURL (важно!)
-  projectId:         "ВСТАВЬ_СЮДА",        // projectId
-  storageBucket:     "ВСТАВЬ_СЮДА",        // storageBucket
-  messagingSenderId: "ВСТАВЬ_СЮДА",        // messagingSenderId
-  appId:             "ВСТАВЬ_СЮДА"         // appId
+  apiKey:            "AIzaSyBuihZuhhKn2-vLt8Ampl6nXnUYonTluhU",        // apiKey
+  authDomain:        "haven-realestate.firebaseapp.com",        // authDomain
+  databaseURL:       "https://haven-realestate-default-rtdb.europe-west1.firebasedatabase.app",        // databaseURL (важно!)
+  projectId:         "haven-realestate",        // projectId
+  storageBucket:     "haven-realestate.firebasestorage.app",        // storageBucket
+  messagingSenderId: "453250401233",        // messagingSenderId
+  appId:             "1:453250401233:web:1eacdea67c0219b1dfd6f0"         // appId
 };
 
 /* После вставки своих данных — сохрани файл.
