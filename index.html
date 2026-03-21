@@ -97,6 +97,7 @@
     <a href="houses.html" id="mob-houses">Дома</a>
     <a href="#services" id="mob-services" onclick="closeMobMenu()">Услуги</a>
     <a href="#contact" id="mob-contact" onclick="closeMobMenu()">Контакты</a>
+    <a href="#contact" id="mob-consult" onclick="closeMobMenu()" style="color:var(--accent);font-size:20px;margin-top:8px">Консультация</a>
     <div class="mob-langs">
       <button class="mob-lang-btn active" data-mob-lang="ru">RU</button>
       <button class="mob-lang-btn" data-mob-lang="en">EN</button>
@@ -367,12 +368,12 @@
         <p data-lang="en">Leave a request — a specialist will contact you within an hour.</p>
         <p data-lang="es">Deje una solicitud — un especialista le contactará en una hora.</p>
         <div class="f-row">
-          <input class="f-input" id="inp-name" type="text" placeholder="...">
-          <input class="f-input" id="inp-phone" type="tel" placeholder="...">
+          <input class="f-input" id="inp-name" type="text" placeholder="Ваше имя">
+          <input class="f-input" id="inp-phone" type="tel" placeholder="Телефон">
         </div>
-        <input class="f-input" id="inp-email" type="email" placeholder="...">
-        <input class="f-input" id="inp-req" type="text" placeholder="...">
-        <button class="btn-dark" id="submit-btn">...</button>
+        <input class="f-input" id="inp-email" type="email" placeholder="Email">
+        <input class="f-input" id="inp-req" type="text" placeholder="Что вы ищете?">
+        <button class="btn-dark" id="submit-btn">Отправить заявку</button>
       </div>
     </div>
   </section>
@@ -541,7 +542,7 @@
     btn.addEventListener('click', function(){ document.getElementById('contact').scrollIntoView({behavior:'smooth'}); });
   });
   document.querySelectorAll('[id^="btn-listings-"]').forEach(function(btn){
-    btn.adEventListener('click', function(){ document.getElementById('listings').scrollIntoView({behavior:'smooth'}); });
+    btn.addEventListener('click', function(){ document.getElementById('listings').scrollIntoView({behavior:'smooth'}); });
   });
   document.getElementById('submit-btn').addEventListener('click', function(){
     var btn=this, t=UI[lang];
@@ -555,10 +556,20 @@
   var burger = document.getElementById('burger');
   var mobMenu = document.getElementById('mobile-menu');
 
-  function openMobMenu(){ burger.classList.add('open'); mobMenu.classList.add('open'); document.body.style.overflow='hidden'; }
-  function closeMobMenu(){ burger.classList.remove('open'); mobMenu.classList.remove('open'); document.body.style.overflow=''; }
+  function openMobMenu(){
+    burger.classList.add('open');
+    mobMenu.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobMenu(){
+    burger.classList.remove('open');
+    mobMenu.classList.remove('open');
+    document.body.style.overflow = '';
+  }
 
-  burger.addEventListener('click', function(){ mobMenu.classList.contains('open') ? closeMobMenu() : openMobMenu(); });
+  burger.addEventListener('click', function(){
+    mobMenu.classList.contains('open') ? closeMobMenu() : openMobMenu();
+  });
   document.getElementById('mob-close').addEventListener('click', closeMobMenu);
 
   // Переключение языка из мобильного меню
@@ -566,14 +577,14 @@
     btn.addEventListener('click', function(){
       var l = btn.getAttribute('data-mob-lang');
       applyLang(l);
-      document.querySelectorAll('[data-mob-lang]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-mob-lang')===l); });
+      document.querySelectorAll('[data-mob-lang]').forEach(function(b){
+        b.classList.toggle('active', b.getAttribute('data-mob-lang') === l);
+      });
       closeMobMenu();
     });
   });
 
-  // Обновить текст мобильного меню при смене языка
-  var origApplyLang = applyLang;
-  // Синхронизация мобильного меню с языком
+  // Обновить ссылки в мобильном меню при смене языка
   function updateMobMenu(l){
     var links = {
       ru: { apts:'Квартиры', houses:'Дома', services:'Услуги', contact:'Контакты' },
@@ -581,19 +592,27 @@
       es: { apts:'Apartamentos', houses:'Casas', services:'Servicios', contact:'Contacto' }
     };
     var t = links[l] || links.ru;
-    document.getElementById('mob-apts').textContent    = t.apts;
-    document.getElementById('mob-houses').textContent  = t.houses;
-    document.getElementById('mob-services').textContent= t.services;
-    document.getElementById('mob-contact').textContent = t.contact;
-    document.querySelectorAll('[data-mob-lang]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-mob-lang')===l); });
+    document.getElementById('mob-apts').textContent     = t.apts;
+    document.getElementById('mob-houses').textContent   = t.houses;
+    document.getElementById('mob-services').textContent = t.services;
+    document.getElementById('mob-contact').textContent  = t.contact;
+    document.querySelectorAll('[data-mob-lang]').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-mob-lang') === l);
+    });
   }
 
-  // Вызывать updateMobMenu при каждом applyLang
-  var _origApply = window.applyLang || applyLang;
   document.querySelectorAll('.lang-btn').forEach(function(btn){
     btn.addEventListener('click', function(){ updateMobMenu(btn.getAttribute('data-set-lang')); });
   });
-  updateMobMenu(localStorage.getItem('haven_lang')||'ru');
+  updateMobMenu(localStorage.getItem('haven_lang') || 'ru');
+
+  // Консультация — кнопки навигации
+  document.querySelectorAll('[id^="nav-consult-btn"]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.getElementById('contact').scrollIntoView({behavior:'smooth'});
+      closeMobMenu();
+    });
+  });
   </script>
 </body>
 </html>

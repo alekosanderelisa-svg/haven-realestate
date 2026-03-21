@@ -804,22 +804,23 @@ footer {
   flex-direction: column;
   gap: 5px;
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
   background: transparent;
   border: none;
   z-index: 200;
+  margin-left: 8px;
 }
 .burger span {
   display: block;
-  width: 24px;
+  width: 26px;
   height: 2px;
   background: var(--dark);
   transition: all 0.35s;
   transform-origin: center;
 }
+/* На прозрачной навигации поверх hero — белый бургер */
+nav:not(.sticky) .burger span { background: var(--dark); }
 nav.sticky .burger span { background: var(--dark); }
-.hero .burger span,
-nav:not(.sticky) .burger span { background: var(--cream); }
 
 /* Анимация бургера → крестик */
 .burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
