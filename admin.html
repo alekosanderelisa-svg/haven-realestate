@@ -5,831 +5,943 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HAVEN — Управление сайтом</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
-    :root {
-      --dark:#1A1714; --cream:#F5F0E8; --sand:#EAE0D2;
-      --warm:#8B7355; --accent:#C4A882; --muted:#6B6058;
-      --green:#4a7a4a; --red:#8B3A3A;
-    }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'DM Sans',sans-serif; background:#f4f1ec; min-height:100vh; }
+    :root{--dark:#1A1714;--cream:#F5F0E8;--sand:#EAE0D2;--warm:#8B7355;--accent:#C4A882;--muted:#6B6058}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:#f2ede6;min-height:100vh}
 
-    /* ══ LOGIN ══ */
-    #login-screen {
-      display:flex; align-items:center; justify-content:center;
-      min-height:100vh; background:var(--dark);
-    }
-    .login-box {
-      background:rgba(255,255,255,0.04); border:1px solid rgba(196,168,130,0.25);
-      padding:56px 48px; width:380px;
-    }
-    .login-logo { font-family:'Cormorant Garamond',Georgia,serif; font-size:36px; font-weight:300; letter-spacing:8px; color:var(--cream); text-align:center; margin-bottom:6px; }
-    .login-tagline { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); text-align:center; margin-bottom:48px; }
-    .login-field { width:100%; padding:13px 16px; background:rgba(255,255,255,0.07); border:1px solid rgba(196,168,130,0.22); color:var(--cream); font-family:'DM Sans',sans-serif; font-size:14px; outline:none; margin-bottom:14px; transition:border-color .3s; }
-    .login-field:focus { border-color:var(--accent); }
-    .login-field::placeholder { color:rgba(245,240,232,0.28); }
-    .login-submit { width:100%; padding:14px; background:var(--accent); color:var(--dark); border:none; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:2.5px; text-transform:uppercase; cursor:pointer; font-weight:500; transition:background .3s; margin-top:6px; }
-    .login-submit:hover { background:#d4b892; }
-    .login-err { color:#c47070; font-size:12px; text-align:center; margin-top:14px; min-height:16px; }
-    .login-hint { color:rgba(107,96,88,0.7); font-size:11px; text-align:center; margin-top:20px; }
-    .login-hint b { color:var(--accent); }
+    /* LOGIN */
+    #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--dark)}
+    .login-box{background:rgba(255,255,255,0.04);border:1px solid rgba(196,168,130,0.22);padding:56px 48px;width:380px}
+    .login-logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:36px;font-weight:300;letter-spacing:8px;color:var(--cream);text-align:center;margin-bottom:6px}
+    .login-sub{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);text-align:center;margin-bottom:44px}
+    .lf{width:100%;padding:13px 16px;background:rgba(255,255,255,0.07);border:1px solid rgba(196,168,130,0.22);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:14px;transition:border-color .3s}
+    .lf:focus{border-color:var(--accent)}.lf::placeholder{color:rgba(245,240,232,0.28)}
+    .l-btn{width:100%;padding:14px;background:var(--accent);color:var(--dark);border:none;font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;font-weight:500;transition:background .3s;margin-top:4px}
+    .l-btn:hover{background:#d4b892}
+    .l-err{color:#c47070;font-size:12px;text-align:center;margin-top:12px;min-height:16px}
+    .l-hint{color:rgba(107,96,88,0.6);font-size:11px;text-align:center;margin-top:18px}
+    .l-hint b{color:var(--accent)}
 
-    /* ══ HEADER ══ */
-    #admin-panel { display:none; }
-    .header {
-      background:var(--dark); height:60px; padding:0 40px;
-      display:flex; align-items:center; justify-content:space-between;
-      position:sticky; top:0; z-index:100;
-    }
-    .header-logo { font-family:'Cormorant Garamond',Georgia,serif; font-size:20px; font-weight:300; letter-spacing:5px; color:var(--cream); }
-    .header-logo sup { font-size:10px; letter-spacing:2px; color:var(--accent); vertical-align:top; margin-top:4px; margin-left:4px; }
-    .header-right { display:flex; align-items:center; gap:12px; }
-    .db-dot { width:8px; height:8px; border-radius:50%; background:#888; transition:background .3s; }
-    .db-dot.green { background:#7ab87a; }
-    .db-dot.red   { background:#c47070; }
-    .db-label { font-size:11px; color:rgba(245,240,232,0.45); }
-    .view-site { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); text-decoration:none; padding:7px 16px; border:1px solid rgba(196,168,130,0.3); transition:all .3s; }
-    .view-site:hover { background:rgba(196,168,130,0.1); }
-    .logout { background:transparent; border:none; color:rgba(245,240,232,0.35); font-family:'DM Sans',sans-serif; font-size:11px; cursor:pointer; transition:color .3s; }
-    .logout:hover { color:var(--cream); }
+    /* HEADER */
+    #admin-panel{display:none}
+    .hdr{background:var(--dark);height:62px;padding:0 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .hdr-logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;font-weight:300;letter-spacing:5px;color:var(--cream)}
+    .hdr-logo sup{font-size:10px;letter-spacing:2px;color:var(--accent);vertical-align:top;margin-top:4px;margin-left:4px}
+    .hdr-r{display:flex;align-items:center;gap:12px}
+    .db-dot{width:8px;height:8px;border-radius:50%;background:#666;transition:background .3s;flex-shrink:0}
+    .db-dot.green{background:#7ab87a}.db-dot.red{background:#c47070}
+    .db-lbl{font-size:11px;color:rgba(245,240,232,0.4)}
+    .view-site{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);text-decoration:none;padding:7px 16px;border:1px solid rgba(196,168,130,0.3);transition:all .3s}
+    .view-site:hover{background:rgba(196,168,130,0.1)}
+    .logout{background:transparent;border:none;color:rgba(245,240,232,0.35);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;transition:color .3s}
+    .logout:hover{color:var(--cream)}
 
-    /* ══ MAIN LAYOUT ══ */
-    .main { max-width:1200px; margin:0 auto; padding:40px 32px; }
+    .main{max-width:1200px;margin:0 auto;padding:36px 28px}
+    .page-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:300;color:var(--dark);margin-bottom:4px}
+    .page-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
 
-    /* ══ PAGE TITLE ══ */
-    .page-title { font-family:'Cormorant Garamond',Georgia,serif; font-size:32px; font-weight:300; color:var(--dark); margin-bottom:6px; }
-    .page-subtitle { font-size:13px; color:var(--muted); margin-bottom:32px; }
+    /* STATS */
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
+    .stat{background:#fff;border:1px solid rgba(139,115,85,0.15);padding:18px 22px}
+    .stat-n{font-family:'Cormorant Garamond',Georgia,serif;font-size:38px;font-weight:300;color:var(--dark);line-height:1}
+    .stat-l{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:4px}
 
-    /* ══ STATS BAR ══ */
-    .stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:36px; }
-    .stat-card { background:#fff; border:1px solid rgba(139,115,85,0.15); padding:20px 24px; }
-    .stat-card-num { font-family:'Cormorant Garamond',Georgia,serif; font-size:40px; font-weight:300; color:var(--dark); line-height:1; }
-    .stat-card-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+    /* NOTICE */
+    .notice{background:#fff;border-left:4px solid var(--accent);padding:18px 22px;margin-bottom:28px;display:none}
+    .notice.show{display:block}
+    .notice-title{font-size:13px;font-weight:500;color:var(--dark);margin-bottom:6px}
+    .notice-text{font-size:12px;color:var(--muted);line-height:1.7}
+    .notice-text ol{margin:6px 0 0 16px}
+    .notice-text a{color:var(--accent)}
 
-    /* ══ SETUP NOTICE ══ */
-    .setup-notice { background:#fff; border:1px solid rgba(196,168,130,0.4); border-left:4px solid var(--accent); padding:20px 24px; margin-bottom:32px; display:none; }
-    .setup-notice.show { display:block; }
-    .setup-notice-title { font-size:14px; font-weight:500; color:var(--dark); margin-bottom:8px; }
-    .setup-notice-text { font-size:13px; color:var(--muted); line-height:1.7; }
-    .setup-notice-text ol { margin:8px 0 0 18px; }
-    .setup-notice-text li { margin-bottom:4px; }
-    .setup-notice-text a { color:var(--accent); }
+    /* TWO COL */
+    .two-col{display:grid;grid-template-columns:440px 1fr;gap:24px;align-items:start}
 
-    /* ══ TWO COLUMN ══ */
-    .two-col { display:grid; grid-template-columns:420px 1fr; gap:28px; align-items:start; }
+    /* CARD */
+    .card{background:#fff;border:1px solid rgba(139,115,85,0.15)}
+    .card-hdr{padding:20px 26px 16px;border-bottom:1px solid rgba(139,115,85,0.1)}
+    .card-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;font-weight:300;color:var(--dark)}
+    .card-body{padding:22px 26px}
 
-    /* ══ ADD FORM CARD ══ */
-    .card { background:#fff; border:1px solid rgba(139,115,85,0.15); }
-    .card-header { padding:22px 28px 18px; border-bottom:1px solid rgba(139,115,85,0.1); }
-    .card-title { font-family:'Cormorant Garamond',Georgia,serif; font-size:22px; font-weight:300; color:var(--dark); }
-    .card-body { padding:24px 28px; }
+    /* FORM */
+    .fg{margin-bottom:15px}
+    .fl{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .fl .req{color:var(--accent)}
+    .fi,.fs,.ft{width:100%;padding:10px 13px;border:1px solid rgba(139,115,85,0.25);background:#fafaf8;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--dark);outline:none;transition:border-color .3s}
+    .fi:focus,.fs:focus,.ft:focus{border-color:var(--accent);background:#fff}
+    .fi::placeholder,.ft::placeholder{color:#b0a89a}
+    .ft{resize:vertical;min-height:72px}
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .fhint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
+    .fhint a{color:var(--accent)}
 
-    .field-label { display:block; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:7px; }
-    .field-required { color:var(--accent); }
-    .field-input, .field-select, .field-textarea {
-      width:100%; padding:11px 14px; border:1px solid rgba(139,115,85,0.25); background:#fafaf8;
-      font-family:'DM Sans',sans-serif; font-size:13px; color:var(--dark); outline:none;
-      transition:border-color .3s;
-    }
-    .field-input:focus, .field-select:focus, .field-textarea:focus { border-color:var(--accent); background:#fff; }
-    .field-input::placeholder, .field-textarea::placeholder { color:#b0a89a; }
-    .field-textarea { resize:vertical; min-height:80px; }
-    .field-group { margin-bottom:18px; }
-    .field-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    .field-hint { font-size:11px; color:var(--muted); margin-top:5px; line-height:1.5; }
-    .field-hint a { color:var(--accent); }
+    /* Переключатели тип/сделка */
+    .tog-group{display:flex;gap:0}
+    .tog{flex:1;padding:10px;border:1px solid rgba(139,115,85,0.25);background:#fafaf8;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all .3s;text-align:center}
+    .tog:not(:last-child){border-right:none}
+    .tog.on{background:var(--dark);color:var(--cream);border-color:var(--dark)}
 
-    /* Toggle buttons for type/deal */
-    .toggle-group { display:flex; gap:0; }
-    .toggle-btn { flex:1; padding:10px; border:1px solid rgba(139,115,85,0.25); background:#fafaf8; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:all .3s; text-align:center; }
-    .toggle-btn:not(:last-child) { border-right:none; }
-    .toggle-btn.active { background:var(--dark); color:var(--cream); border-color:var(--dark); }
+    /* ЯЗЫКИ — вкладки */
+    .lang-tabs{display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid rgba(139,115,85,0.12)}
+    .lang-tab{padding:8px 18px;background:transparent;border:none;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .3s}
+    .lang-tab.on{color:var(--dark);border-bottom-color:var(--accent)}
+    .lang-pane{display:none}.lang-pane.on{display:block}
 
-    .img-preview { width:100%; height:140px; object-fit:cover; display:none; margin-top:10px; border:1px solid rgba(139,115,85,0.15); }
-    .img-preview.show { display:block; }
+    /* Загрузка фото */
+    .photo-area{border:2px dashed rgba(139,115,85,0.3);background:#fafaf8;padding:20px;text-align:center;cursor:pointer;transition:all .3s;position:relative}
+    .photo-area:hover{border-color:var(--accent);background:rgba(196,168,130,0.05)}
+    .photo-area.drag{border-color:var(--accent);background:rgba(196,168,130,0.1)}
+    .photo-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .photo-icon{font-size:28px;margin-bottom:8px;opacity:.5}
+    .photo-label{font-size:13px;color:var(--muted);margin-bottom:4px}
+    .photo-hint{font-size:11px;color:rgba(107,96,88,0.6)}
+    .photo-preview{width:100%;max-height:180px;object-fit:cover;display:none;margin-top:12px;border:1px solid rgba(139,115,85,0.15)}
+    .photo-preview.show{display:block}
+    .photo-or{font-size:11px;color:var(--muted);text-align:center;margin:10px 0;position:relative}
+    .photo-or::before,.photo-or::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:rgba(139,115,85,0.15)}
+    .photo-or::before{left:0}.photo-or::after{right:0}
 
-    .submit-btn { width:100%; padding:14px; background:var(--accent); color:var(--dark); border:none; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:2.5px; text-transform:uppercase; cursor:pointer; font-weight:500; transition:background .3s; margin-top:8px; }
-    .submit-btn:hover { background:#d4b892; }
-    .submit-btn:disabled { background:var(--muted); cursor:not-allowed; }
-    .form-msg { font-size:12px; text-align:center; margin-top:12px; min-height:16px; transition:opacity .3s; }
+    .submit-btn{width:100%;padding:14px;background:var(--accent);color:var(--dark);border:none;font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;font-weight:500;transition:background .3s;margin-top:8px}
+    .submit-btn:hover{background:#d4b892}.submit-btn:disabled{background:var(--muted);cursor:not-allowed}
+    .form-msg{font-size:12px;text-align:center;margin-top:10px;min-height:16px}
 
-    /* ══ LISTINGS ══ */
-    .listings-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:12px; }
-    .listings-title { font-family:'Cormorant Garamond',Georgia,serif; font-size:20px; font-weight:300; color:var(--dark); }
-    .filter-tabs { display:flex; gap:4px; }
-    .filter-tab { padding:7px 16px; background:transparent; border:1px solid rgba(139,115,85,0.2); font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:all .3s; }
-    .filter-tab:hover { border-color:var(--accent); color:var(--warm); }
-    .filter-tab.active { background:var(--dark); color:var(--cream); border-color:var(--dark); }
+    /* LISTINGS */
+    .lst-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+    .lst-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;font-weight:300;color:var(--dark)}
+    .ftabs{display:flex;gap:4px}
+    .ftab{padding:6px 14px;background:transparent;border:1px solid rgba(139,115,85,0.2);font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all .3s}
+    .ftab:hover{border-color:var(--accent);color:var(--warm)}.ftab.on{background:var(--dark);color:var(--cream);border-color:var(--dark)}
 
-    /* Property card in admin */
-    .prop-cards { display:flex; flex-direction:column; gap:10px; }
-    .prop-card { background:#fff; border:1px solid rgba(139,115,85,0.15); display:grid; grid-template-columns:100px 1fr; overflow:hidden; transition:border-color .3s; }
-    .prop-card:hover { border-color:rgba(139,115,85,0.4); }
-    .prop-card.is-sold { opacity:.45; }
-    .prop-img { width:100px; height:82px; object-fit:cover; display:block; }
-    .prop-img-ph { width:100px; height:82px; background:var(--sand); display:flex; align-items:center; justify-content:center; font-size:26px; }
-    .prop-body { padding:12px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
-    .prop-info { flex:1; min-width:0; }
-    .prop-name { font-family:'Cormorant Garamond',Georgia,serif; font-size:17px; font-weight:300; color:var(--dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .prop-meta { font-size:12px; color:var(--muted); margin-top:3px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .prop-price { font-size:13px; color:var(--warm); font-family:'Cormorant Garamond',Georgia,serif; margin-top:4px; }
-    .prop-date { font-size:10px; color:rgba(107,96,88,0.6); }
-    .badge { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:2px 8px; }
-    .badge-buy  { background:rgba(196,168,130,0.2); color:var(--warm); }
-    .badge-rent { background:rgba(139,115,85,0.15); color:var(--warm); }
-    .badge-sold { background:rgba(139,58,58,0.12); color:#8B3A3A; }
+    /* PROP ROW */
+    .prop-list{display:flex;flex-direction:column;gap:8px}
+    .prow{background:#fff;border:1px solid rgba(139,115,85,0.15);display:grid;grid-template-columns:90px 1fr auto;overflow:hidden;transition:border-color .3s}
+    .prow:hover{border-color:rgba(139,115,85,0.4)}.prow.sold{opacity:.4}
+    .pthumb{width:90px;height:74px;object-fit:cover;display:block}
+    .pph{width:90px;height:74px;background:var(--sand);display:flex;align-items:center;justify-content:center;font-size:22px}
+    .pbody{padding:11px 15px;display:flex;flex-direction:column;justify-content:center;gap:3px}
+    .pname{font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;font-weight:300;color:var(--dark)}
+    .pmeta{font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .pprice{font-size:13px;color:var(--warm);font-family:'Cormorant Garamond',Georgia,serif}
+    .pbadge{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px}
+    .pbadge.buy{background:rgba(196,168,130,0.18);color:var(--warm)}
+    .pbadge.rent{background:rgba(139,115,85,0.15);color:var(--warm)}
+    .pbadge.sold-b{background:rgba(139,58,58,0.12);color:#8B3A3A}
+    .pacts{padding:10px 12px;display:flex;flex-direction:column;gap:5px;justify-content:center;min-width:120px}
+    .act{padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;transition:all .3s;text-align:center}
+    .act-e{background:rgba(196,168,130,0.15);color:var(--warm)}.act-e:hover{background:rgba(196,168,130,0.3)}
+    .act-s{background:rgba(139,115,85,0.1);color:var(--warm)}.act-s:hover{background:rgba(139,115,85,0.25)}
+    .act-d{background:rgba(139,58,58,0.08);color:#8B3A3A}.act-d:hover{background:rgba(139,58,58,0.2)}
+    .empty-st{text-align:center;padding:56px 24px}
+    .empty-ic{font-size:36px;opacity:.3;margin-bottom:12px}
+    .empty-tx{font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:300;color:var(--muted)}
 
-    /* Action buttons */
-    .prop-actions { display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
-    .act { padding:7px 14px; font-family:'DM Sans',sans-serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; border:none; transition:all .3s; white-space:nowrap; }
-    .act-edit { background:rgba(196,168,130,0.15); color:var(--warm); }
-    .act-edit:hover { background:rgba(196,168,130,0.3); }
-    .act-sold { background:rgba(139,115,85,0.1); color:var(--warm); }
-    .act-sold:hover { background:rgba(139,115,85,0.25); }
-    .act-delete { background:rgba(139,58,58,0.08); color:#8B3A3A; }
-    .act-delete:hover { background:rgba(139,58,58,0.2); }
+    /* EDIT MODAL */
+    .overlay{display:none;position:fixed;inset:0;background:rgba(26,23,20,0.7);z-index:500;align-items:center;justify-content:center;padding:20px}
+    .overlay.open{display:flex}
+    .modal{background:#fff;width:100%;max-width:580px;max-height:90vh;overflow-y:auto}
+    .modal-hdr{padding:22px 26px 18px;border-bottom:1px solid rgba(139,115,85,0.12);display:flex;justify-content:space-between;align-items:center}
+    .modal-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:300;color:var(--dark)}
+    .modal-x{background:transparent;border:none;font-size:20px;color:var(--muted);cursor:pointer;line-height:1}
+    .modal-body{padding:22px 26px}
+    .modal-footer{padding:16px 26px;border-top:1px solid rgba(139,115,85,0.12);display:flex;gap:10px}
+    .m-save{flex:1;padding:12px;background:var(--accent);color:var(--dark);border:none;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:500;transition:background .3s}
+    .m-save:hover{background:#d4b892}
+    .m-cancel{padding:12px 20px;background:transparent;color:var(--muted);border:1px solid rgba(139,115,85,0.2);font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
+    .m-cancel:hover{color:var(--dark)}
 
-    .empty-state { text-align:center; padding:60px 24px; color:var(--muted); }
-    .empty-icon { font-size:40px; margin-bottom:14px; opacity:.4; }
-    .empty-text { font-family:'Cormorant Garamond',Georgia,serif; font-size:22px; font-weight:300; }
+    /* TOAST */
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--dark);color:var(--cream);padding:12px 26px;font-size:13px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    /* ══ EDIT MODAL ══ */
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(26,23,20,0.7); z-index:500; align-items:center; justify-content:center; padding:20px; }
-    .modal-overlay.open { display:flex; }
-    .modal { background:#fff; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; }
-    .modal-header { padding:24px 28px 20px; border-bottom:1px solid rgba(139,115,85,0.12); display:flex; justify-content:space-between; align-items:center; }
-    .modal-title { font-family:'Cormorant Garamond',Georgia,serif; font-size:24px; font-weight:300; color:var(--dark); }
-    .modal-close { background:transparent; border:none; font-size:20px; color:var(--muted); cursor:pointer; line-height:1; padding:4px; }
-    .modal-body { padding:24px 28px; }
-    .modal-footer { padding:18px 28px; border-top:1px solid rgba(139,115,85,0.12); display:flex; gap:10px; }
-    .modal-save { flex:1; padding:13px; background:var(--accent); color:var(--dark); border:none; font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; font-weight:500; transition:background .3s; }
-    .modal-save:hover { background:#d4b892; }
-    .modal-cancel { padding:13px 22px; background:transparent; color:var(--muted); border:1px solid rgba(139,115,85,0.2); font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; }
-    .modal-cancel:hover { color:var(--dark); border-color:rgba(139,115,85,0.4); }
-
-    /* ══ SUCCESS TOAST ══ */
-    .toast {
-      position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px);
-      background:var(--dark); color:var(--cream); padding:13px 28px;
-      font-size:13px; z-index:999; opacity:0; transition:all .35s;
-      white-space:nowrap; pointer-events:none;
-    }
-    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-    @media(max-width:900px){
-      .two-col { grid-template-columns:1fr; }
-      .stats-bar { grid-template-columns:repeat(2,1fr); }
-    }
-    @media(max-width:560px){
-      .main { padding:24px 16px; }
-      .stats-bar { grid-template-columns:1fr 1fr; }
-      .prop-card { grid-template-columns:80px 1fr; }
-      .prop-actions { flex-direction:row; }
+    @media(max-width:920px){
+      .two-col{grid-template-columns:1fr}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .prow{grid-template-columns:76px 1fr}
+      .pacts{grid-column:span 2;flex-direction:row;border-top:1px solid rgba(139,115,85,0.08)}
     }
   </style>
 </head>
 <body>
 
-<!-- ══ LOGIN ══ -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">HAVEN</div>
-    <div class="login-tagline">Управление сайтом</div>
-    <input class="login-field" id="l-user" type="text" placeholder="Логин">
-    <input class="login-field" id="l-pass" type="password" placeholder="Пароль">
-    <button class="login-submit" id="l-submit">Войти →</button>
-    <div class="login-err" id="l-err"></div>
-    <div class="login-hint">Логин: <b>admin</b> &nbsp;·&nbsp; Пароль: <b>haven2024</b></div>
+    <div class="login-sub">Управление сайтом</div>
+    <input class="lf" id="l-u" type="text" placeholder="Логин">
+    <input class="lf" id="l-p" type="password" placeholder="Пароль">
+    <button class="l-btn" id="l-btn">Войти →</button>
+    <div class="l-err" id="l-err"></div>
+    <div class="l-hint">Логин: <b>admin</b> &nbsp;·&nbsp; Пароль: <b>haven2024</b></div>
   </div>
 </div>
 
-<!-- ══ ADMIN PANEL ══ -->
+<!-- ADMIN -->
 <div id="admin-panel">
-
-  <div class="header">
-    <div class="header-logo">HAVEN <sup>Admin</sup></div>
-    <div class="header-right">
+  <div class="hdr">
+    <div class="hdr-logo">HAVEN <sup>Admin</sup></div>
+    <div class="hdr-r">
       <div class="db-dot" id="db-dot"></div>
-      <span class="db-label" id="db-label">Подключение...</span>
-      <a href="index.html" class="view-site" target="_blank">Смотреть сайт →</a>
+      <span class="db-lbl" id="db-lbl">Подключение...</span>
+      <a href="index.html" class="view-site" target="_blank">← На сайт</a>
       <button class="logout" id="logout-btn">Выйти</button>
     </div>
   </div>
 
   <div class="main">
-
     <div class="page-title">Управление объектами</div>
-    <div class="page-subtitle">Добавляйте, редактируйте и удаляйте объекты — изменения появляются на сайте мгновенно</div>
+    <div class="page-sub">Добавляйте, редактируйте и удаляйте объекты — изменения сразу видны клиентам</div>
 
-    <!-- Статистика -->
-    <div class="stats-bar">
-      <div class="stat-card">
-        <div class="stat-card-num" id="stat-total">—</div>
-        <div class="stat-card-label">Всего объектов</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-num" id="stat-sale">—</div>
-        <div class="stat-card-label">На продажу</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-num" id="stat-rent">—</div>
-        <div class="stat-card-label">В аренду</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-num" id="stat-sold">—</div>
-        <div class="stat-card-label">Продано / Сдано</div>
-      </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="s-total">—</div><div class="stat-l">Всего</div></div>
+      <div class="stat"><div class="stat-n" id="s-sale">—</div><div class="stat-l">Продажа</div></div>
+      <div class="stat"><div class="stat-n" id="s-rent">—</div><div class="stat-l">Аренда</div></div>
+      <div class="stat"><div class="stat-n" id="s-sold">—</div><div class="stat-l">Продано/Сдано</div></div>
     </div>
 
-    <!-- Уведомление настройки -->
-    <div class="setup-notice" id="setup-notice">
-      <div class="setup-notice-title">⚙ Нужно подключить Firebase — иначе изменения видны только вам</div>
-      <div class="setup-notice-text">
-        Инструкция в файле <b>firebase-config.js</b>. Займёт 5 минут:
+    <div class="notice" id="notice">
+      <div class="notice-title">⚙ Настройте Firebase — иначе изменения видны только вам</div>
+      <div class="notice-text">
         <ol>
           <li>Зайди на <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → создай проект</li>
-          <li>Realtime Database → Create database → выбери <b>test mode</b></li>
-          <li>Настройки ⚙ → Your apps → &lt;/&gt; → скопируй <b>firebaseConfig</b></li>
-          <li>Вставь данные в файл <b>firebase-config.js</b> → загрузи на сайт</li>
+          <li>Realtime Database → Create database → test mode</li>
+          <li>⚙ Project settings → Your apps → &lt;/&gt; → скопируй firebaseConfig</li>
+          <li>Вставь в файл <b>firebase-config.js</b> → загрузи на сайт</li>
         </ol>
       </div>
     </div>
 
-    <!-- Два столбца: форма + список -->
     <div class="two-col">
 
-      <!-- ── ФОРМА ДОБАВЛЕНИЯ ── -->
+      <!-- ФОРМА ДОБАВЛЕНИЯ -->
       <div class="card">
-        <div class="card-header">
-          <div class="card-title">Добавить новый объект</div>
-        </div>
+        <div class="card-hdr"><div class="card-title">+ Добавить объект</div></div>
         <div class="card-body">
 
-          <!-- Тип -->
-          <div class="field-group">
-            <label class="field-label">Тип объекта <span class="field-required">*</span></label>
-            <div class="toggle-group">
-              <button class="toggle-btn active" data-type="apartment" id="type-apt">🏢 Квартира</button>
-              <button class="toggle-btn" data-type="house" id="type-house">🏡 Дом / Вилла</button>
+          <!-- Тип и сделка -->
+          <div class="fg">
+            <label class="fl">Тип объекта <span class="req">*</span></label>
+            <div class="tog-group">
+              <button class="tog on" data-type="apartment">🏢 Квартира</button>
+              <button class="tog" data-type="house">🏡 Дом / Вилла</button>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Тип сделки <span class="req">*</span></label>
+            <div class="tog-group">
+              <button class="tog on" data-deal="buy">💶 Продажа</button>
+              <button class="tog" data-deal="rent">🔑 Аренда</button>
             </div>
           </div>
 
-          <!-- Тип сделки -->
-          <div class="field-group">
-            <label class="field-label">Тип сделки <span class="field-required">*</span></label>
-            <div class="toggle-group">
-              <button class="toggle-btn active" data-deal="buy" id="deal-buy">💶 Продажа</button>
-              <button class="toggle-btn" data-deal="rent" id="deal-rent">🔑 Аренда</button>
+          <!-- НАЗВАНИЯ НА 3 ЯЗЫКАХ -->
+          <div class="fg">
+            <label class="fl">Название объекта <span class="req">*</span></label>
+            <div class="lang-tabs">
+              <button class="lang-tab on" data-lt="ru">🇷🇺 RU</button>
+              <button class="lang-tab" data-lt="en">🇬🇧 EN</button>
+              <button class="lang-tab" data-lt="es">🇪🇸 ES</button>
             </div>
-          </div>
-
-          <!-- Название -->
-          <div class="field-group">
-            <label class="field-label">Название объекта <span class="field-required">*</span></label>
-            <input class="field-input" id="f-name" placeholder='Например: Вилла «Лагуна»'>
+            <div class="lang-pane on" id="lp-ru">
+              <input class="fi" id="f-name-ru" placeholder='Например: Вилла «Лагуна»'>
+            </div>
+            <div class="lang-pane" id="lp-en">
+              <input class="fi" id="f-name-en" placeholder="E.g.: Villa Laguna">
+            </div>
+            <div class="lang-pane" id="lp-es">
+              <input class="fi" id="f-name-es" placeholder="Ej.: Villa Laguna">
+            </div>
+            <div class="fhint">Если EN и ES не заполнены — используется русское название</div>
           </div>
 
           <!-- Локация -->
-          <div class="field-group">
-            <label class="field-label">Расположение <span class="field-required">*</span></label>
-            <input class="field-input" id="f-loc" placeholder="Например: Torrevieja, Costa Blanca">
+          <div class="fg">
+            <label class="fl">Расположение <span class="req">*</span></label>
+            <input class="fi" id="f-loc" placeholder="Torrevieja, Costa Blanca">
           </div>
 
           <!-- Цена -->
-          <div class="field-row">
-            <div class="field-group">
-              <label class="field-label">Цена в € <span class="field-required">*</span></label>
-              <input class="field-input" id="f-price" type="number" placeholder="285000">
+          <div class="frow">
+            <div class="fg">
+              <label class="fl">Цена € <span class="req">*</span></label>
+              <input class="fi" id="f-price" type="number" placeholder="285000">
             </div>
-            <div class="field-group">
-              <label class="field-label">Как показать цену</label>
-              <input class="field-input" id="f-price-txt" placeholder="€ 285 000">
-              <div class="field-hint">Оставь пустым — заполнится автоматически</div>
+            <div class="fg">
+              <label class="fl">Как показать цену</label>
+              <input class="fi" id="f-price-txt" placeholder="€ 285 000">
+              <div class="fhint">Пусто = автоматически</div>
             </div>
           </div>
 
           <!-- Характеристики -->
-          <div class="field-row">
-            <div class="field-group">
-              <label class="field-label">Спален</label>
-              <input class="field-input" id="f-beds" type="number" placeholder="3">
+          <div class="frow">
+            <div class="fg">
+              <label class="fl">Спален</label>
+              <input class="fi" id="f-beds" type="number" placeholder="3">
             </div>
-            <div class="field-group">
-              <label class="field-label">Площадь м²</label>
-              <input class="field-input" id="f-area" type="number" placeholder="120">
+            <div class="fg">
+              <label class="fl">Площадь м²</label>
+              <input class="fi" id="f-area" type="number" placeholder="120">
             </div>
           </div>
 
           <!-- Описание -->
-          <div class="field-group">
-            <label class="field-label">Описание объекта</label>
-            <textarea class="field-textarea" id="f-desc" placeholder="Опишите объект: чем он хорош, что рядом, особенности..."></textarea>
+          <div class="fg">
+            <label class="fl">Описание</label>
+            <textarea class="ft" id="f-desc" placeholder="Опишите объект..."></textarea>
           </div>
 
-          <!-- Фото -->
-          <div class="field-group">
-            <label class="field-label">Ссылка на фотографию <span class="field-required">*</span></label>
-            <input class="field-input" id="f-img" placeholder="https://images.unsplash.com/photo-..." oninput="previewImg(this.value,'add-preview')">
-            <img class="img-preview" id="add-preview" alt="Предпросмотр фото">
-            <div class="field-hint">
-              Бесплатные фото: <a href="https://unsplash.com" target="_blank">unsplash.com</a> — нажми на фото → Download → Copy link и вставь сюда
+          <!-- ФОТО — загрузка файла или ссылка -->
+          <div class="fg">
+            <label class="fl">Фотография <span class="req">*</span></label>
+
+            <!-- Зона загрузки файла -->
+            <div class="photo-area" id="photo-drop">
+              <input type="file" id="f-file" accept="image/*" onchange="handleFileSelect(this,'add')">
+              <div class="photo-icon">📷</div>
+              <div class="photo-label">Нажмите или перетащите фото сюда</div>
+              <div class="photo-hint">JPG, PNG, WEBP · до 5 МБ</div>
             </div>
+            <img class="photo-preview" id="add-preview" alt="">
+
+            <div class="photo-or">или вставьте ссылку</div>
+            <input class="fi" id="f-img" placeholder="https://images.unsplash.com/..." oninput="previewUrl(this.value,'add-preview')">
+            <div class="fhint">Бесплатные фото: <a href="https://unsplash.com" target="_blank">unsplash.com</a></div>
           </div>
 
-          <!-- Удобства -->
-          <div class="field-group">
-            <label class="field-label">Удобства</label>
-            <input class="field-input" id="f-amen" placeholder="Бассейн, Гараж, Вид на море, Кондиционеры">
-            <div class="field-hint">Вводи через запятую</div>
+          <!-- Удобства на 3 языках -->
+          <div class="fg">
+            <label class="fl">Удобства</label>
+            <div class="lang-tabs">
+              <button class="lang-tab on" data-at="ru">🇷🇺 RU</button>
+              <button class="lang-tab" data-at="en">🇬🇧 EN</button>
+              <button class="lang-tab" data-at="es">🇪🇸 ES</button>
+            </div>
+            <div class="lang-pane on" id="ap-ru"><input class="fi" id="f-amen-ru" placeholder="Бассейн, Гараж, Вид на море"></div>
+            <div class="lang-pane" id="ap-en"><input class="fi" id="f-amen-en" placeholder="Pool, Garage, Sea view"></div>
+            <div class="lang-pane" id="ap-es"><input class="fi" id="f-amen-es" placeholder="Piscina, Garaje, Vista al mar"></div>
+            <div class="fhint">Через запятую. EN и ES необязательны</div>
           </div>
 
-          <button class="submit-btn" id="add-btn">+ Опубликовать объект на сайте</button>
+          <!-- Характеристики (доп. строки) на 3 языках -->
+          <div class="fg">
+            <label class="fl">Дополнительные характеристики</label>
+            <div class="lang-tabs">
+              <button class="lang-tab on" data-dt="ru">🇷🇺 RU</button>
+              <button class="lang-tab" data-dt="en">🇬🇧 EN</button>
+              <button class="lang-tab" data-dt="es">🇪🇸 ES</button>
+            </div>
+            <div class="lang-pane on" id="dp-ru">
+              <textarea class="ft" id="f-det-ru" placeholder="Год постройки: 2020&#10;До пляжа: 200 м&#10;Парковка: 2 места" style="min-height:90px"></textarea>
+            </div>
+            <div class="lang-pane" id="dp-en">
+              <textarea class="ft" id="f-det-en" placeholder="Year built: 2020&#10;To beach: 200 m&#10;Parking: 2 spaces" style="min-height:90px"></textarea>
+            </div>
+            <div class="lang-pane" id="dp-es">
+              <textarea class="ft" id="f-det-es" placeholder="Año construcción: 2020&#10;A la playa: 200 m&#10;Parking: 2 plazas" style="min-height:90px"></textarea>
+            </div>
+            <div class="fhint">Каждая характеристика на новой строке в формате: Название: Значение</div>
+          </div>
+
+          <button class="submit-btn" id="add-btn">+ Опубликовать на сайте</button>
           <div class="form-msg" id="form-msg"></div>
         </div>
       </div>
 
-      <!-- ── СПИСОК ОБЪЕКТОВ ── -->
+      <!-- СПИСОК ОБЪЕКТОВ -->
       <div>
-        <div class="listings-header">
-          <div class="listings-title" id="listings-count">Объекты на сайте</div>
-          <div class="filter-tabs">
-            <button class="filter-tab active" data-f="active">Активные</button>
-            <button class="filter-tab" data-f="buy">Продажа</button>
-            <button class="filter-tab" data-f="rent">Аренда</button>
-            <button class="filter-tab" data-f="sold">Проданные</button>
+        <div class="lst-hdr">
+          <div class="lst-title" id="lst-count">Объекты на сайте</div>
+          <div class="ftabs">
+            <button class="ftab on" data-f="active">Активные</button>
+            <button class="ftab" data-f="buy">Продажа</button>
+            <button class="ftab" data-f="rent">Аренда</button>
+            <button class="ftab" data-f="sold">Проданные</button>
           </div>
         </div>
-        <div class="prop-cards" id="prop-cards">
-          <div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Загрузка...</div></div>
+        <div class="prop-list" id="prop-list">
+          <div class="empty-st"><div class="empty-ic">⏳</div><div class="empty-tx">Загрузка...</div></div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
 
-<!-- ══ EDIT MODAL ══ -->
-<div class="modal-overlay" id="edit-modal">
+<!-- EDIT MODAL -->
+<div class="overlay" id="edit-modal">
   <div class="modal">
-    <div class="modal-header">
+    <div class="modal-hdr">
       <div class="modal-title">Редактировать объект</div>
-      <button class="modal-close" id="modal-close">✕</button>
+      <button class="modal-x" id="modal-x">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="e-id">
-      <div class="field-group">
-        <label class="field-label">Название</label>
-        <input class="field-input" id="e-name">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Расположение</label>
-        <input class="field-input" id="e-loc">
-      </div>
-      <div class="field-row">
-        <div class="field-group">
-          <label class="field-label">Тип объекта</label>
-          <select class="field-select" id="e-type">
-            <option value="apartment">Квартира / Апартаменты</option>
-            <option value="house">Дом / Вилла</option>
-          </select>
+
+      <!-- Название на 3 языках -->
+      <div class="fg">
+        <label class="fl">Название</label>
+        <div class="lang-tabs">
+          <button class="lang-tab on" data-elt="ru">🇷🇺 RU</button>
+          <button class="lang-tab" data-elt="en">🇬🇧 EN</button>
+          <button class="lang-tab" data-elt="es">🇪🇸 ES</button>
         </div>
-        <div class="field-group">
-          <label class="field-label">Тип сделки</label>
-          <select class="field-select" id="e-deal">
-            <option value="buy">Продажа</option>
-            <option value="rent">Аренда</option>
-          </select>
-        </div>
+        <div class="lang-pane on" id="elp-ru"><input class="fi" id="e-name-ru" placeholder="Русское название"></div>
+        <div class="lang-pane" id="elp-en"><input class="fi" id="e-name-en" placeholder="English name"></div>
+        <div class="lang-pane" id="elp-es"><input class="fi" id="e-name-es" placeholder="Nombre en español"></div>
       </div>
-      <div class="field-row">
-        <div class="field-group">
-          <label class="field-label">Цена (число €)</label>
-          <input class="field-input" id="e-price" type="number">
-        </div>
-        <div class="field-group">
-          <label class="field-label">Цена (текст)</label>
-          <input class="field-input" id="e-price-txt">
-        </div>
+
+      <div class="fg"><label class="fl">Расположение</label><input class="fi" id="e-loc"></div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Тип</label><select class="fs" id="e-type"><option value="apartment">Квартира</option><option value="house">Дом/Вилла</option></select></div>
+        <div class="fg"><label class="fl">Сделка</label><select class="fs" id="e-deal"><option value="buy">Продажа</option><option value="rent">Аренда</option></select></div>
       </div>
-      <div class="field-row">
-        <div class="field-group">
-          <label class="field-label">Спален</label>
-          <input class="field-input" id="e-beds" type="number">
+      <div class="frow">
+        <div class="fg"><label class="fl">Цена (число)</label><input class="fi" id="e-price" type="number"></div>
+        <div class="fg"><label class="fl">Цена (текст)</label><input class="fi" id="e-price-txt"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Спален</label><input class="fi" id="e-beds" type="number"></div>
+        <div class="fg"><label class="fl">Площадь м²</label><input class="fi" id="e-area" type="number"></div>
+      </div>
+      <div class="fg"><label class="fl">Описание</label><textarea class="ft" id="e-desc"></textarea></div>
+
+      <!-- Фото в редакторе -->
+      <div class="fg">
+        <label class="fl">Фото</label>
+        <div class="photo-area">
+          <input type="file" id="e-file" accept="image/*" onchange="handleFileSelect(this,'edit')">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Загрузить новое фото</div>
         </div>
-        <div class="field-group">
-          <label class="field-label">Площадь м²</label>
-          <input class="field-input" id="e-area" type="number">
+        <img class="photo-preview" id="edit-preview" alt="">
+        <div class="photo-or">или ссылка</div>
+        <input class="fi" id="e-img" oninput="previewUrl(this.value,'edit-preview')">
+      </div>
+
+      <div class="fg">
+        <label class="fl">Удобства</label>
+        <div class="lang-tabs">
+          <button class="lang-tab on" data-eat="ru">🇷🇺 RU</button>
+          <button class="lang-tab" data-eat="en">🇬🇧 EN</button>
+          <button class="lang-tab" data-eat="es">🇪🇸 ES</button>
         </div>
+        <div class="lang-pane on" id="eap-ru"><input class="fi" id="e-amen-ru" placeholder="Бассейн, Гараж, Вид на море"></div>
+        <div class="lang-pane" id="eap-en"><input class="fi" id="e-amen-en" placeholder="Pool, Garage, Sea view"></div>
+        <div class="lang-pane" id="eap-es"><input class="fi" id="e-amen-es" placeholder="Piscina, Garaje, Vista al mar"></div>
       </div>
-      <div class="field-group">
-        <label class="field-label">Описание</label>
-        <textarea class="field-textarea" id="e-desc"></textarea>
-      </div>
-      <div class="field-group">
-        <label class="field-label">Ссылка на фото</label>
-        <input class="field-input" id="e-img" oninput="previewImg(this.value,'e-preview')">
-        <img class="img-preview" id="e-preview" alt="Предпросмотр">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Удобства (через запятую)</label>
-        <input class="field-input" id="e-amen">
+      <div class="fg">
+        <label class="fl">Характеристики</label>
+        <div class="lang-tabs">
+          <button class="lang-tab on" data-edt="ru">🇷🇺 RU</button>
+          <button class="lang-tab" data-edt="en">🇬🇧 EN</button>
+          <button class="lang-tab" data-edt="es">🇪🇸 ES</button>
+        </div>
+        <div class="lang-pane on" id="edp-ru"><textarea class="ft" id="e-det-ru" style="min-height:80px" placeholder="Год: 2020&#10;До пляжа: 200 м"></textarea></div>
+        <div class="lang-pane" id="edp-en"><textarea class="ft" id="e-det-en" style="min-height:80px" placeholder="Year: 2020&#10;To beach: 200 m"></textarea></div>
+        <div class="lang-pane" id="edp-es"><textarea class="ft" id="e-det-es" style="min-height:80px" placeholder="Año: 2020&#10;A la playa: 200 m"></textarea></div>
+        <div class="fhint">Каждая строка: Название: Значение</div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="modal-cancel" id="modal-cancel">Отмена</button>
-      <button class="modal-save" id="modal-save">Сохранить изменения →</button>
+      <button class="m-cancel" id="modal-cancel">Отмена</button>
+      <button class="m-save" id="modal-save">Сохранить →</button>
     </div>
   </div>
 </div>
 
-<!-- ══ TOAST ══ -->
 <div class="toast" id="toast"></div>
 
 <script src="firebase-config.js"></script>
 <script>
-/* ════════════════════════════════════════════════════════════
-   HAVEN ADMIN — полное управление без кода
-   Данные: Firebase Realtime Database (если настроен)
-          или localStorage (если Firebase не настроен)
-════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════
+   HAVEN ADMIN v3 — загрузка фото, 3 языка
+════════════════════════════════════════════════ */
 
-var ADMIN_LOGIN = 'admin';
-var ADMIN_PASS  = 'haven2024'; // ← смени здесь
+var LOGIN = 'admin', PASS = 'haven2024';
+var KEY = 'haven_props';
+var db = null, fbOk = false;
+var props = {}, curFilter = 'active';
+var addType = 'apartment', addDeal = 'buy';
+var addImgBase64 = '', editImgBase64 = '';
 
-var db = null;
-var props = {};
-var curFilter = 'active';
-var addType = 'apartment';
-var addDeal = 'buy';
-var fbOk = false;
-
-/* ─── AUTH ─── */
-document.getElementById('l-submit').addEventListener('click', tryLogin);
-['l-user','l-pass'].forEach(function(id){
+/* ── LOGIN ── */
+['l-btn'].forEach(function(id){
+  document.getElementById(id).addEventListener('click', tryLogin);
+});
+['l-u','l-p'].forEach(function(id){
   document.getElementById(id).addEventListener('keydown', function(e){ if(e.key==='Enter') tryLogin(); });
 });
 
 function tryLogin(){
-  var u = document.getElementById('l-user').value.trim();
-  var p = document.getElementById('l-pass').value;
-  if(u === ADMIN_LOGIN && p === ADMIN_PASS){
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('admin-panel').style.display  = 'block';
-    initStorage();
+  if(document.getElementById('l-u').value.trim()===LOGIN &&
+     document.getElementById('l-p').value===PASS){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-panel').style.display='block';
+    initDB();
   } else {
-    document.getElementById('l-err').textContent = 'Неверный логин или пароль';
-    document.getElementById('l-pass').value = '';
-    setTimeout(function(){ document.getElementById('l-err').textContent=''; }, 3000);
+    document.getElementById('l-err').textContent='Неверный логин или пароль';
+    document.getElementById('l-p').value='';
+    setTimeout(function(){ document.getElementById('l-err').textContent=''; },3000);
   }
 }
 
 document.getElementById('logout-btn').addEventListener('click', function(){
   if(db) db.ref('properties').off();
-  document.getElementById('admin-panel').style.display  = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('l-pass').value = '';
+  document.getElementById('admin-panel').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('l-p').value='';
 });
 
-/* ─── STORAGE: Firebase или localStorage ─── */
-function isFirebaseConfigured(){
+/* ── DB ── */
+function isFBok(){
   if(!window.FIREBASE_CONFIG) return false;
-  var c = window.FIREBASE_CONFIG;
-  return c.apiKey && c.apiKey !== 'ВСТАВЬ_СЮДА' && c.databaseURL && c.databaseURL !== 'ВСТАВЬ_СЮДА';
+  var c=window.FIREBASE_CONFIG;
+  return c.apiKey && c.apiKey!=='ВСТАВЬ_СЮДА' && c.databaseURL && c.databaseURL!=='ВСТАВЬ_СЮДА';
 }
 
-function initStorage(){
-  setDbStatus('loading');
-  if(isFirebaseConfigured()){
+function initDB(){
+  setDot('…');
+  if(isFBok()){
     try{
       if(!firebase.apps.length) firebase.initializeApp(window.FIREBASE_CONFIG);
-      db = firebase.database();
-      db.ref('properties').on('value', function(snap){
-        props = snap.val() || {};
-        fbOk = true;
-        setDbStatus('ok');
-        renderAll();
-      }, function(err){
-        setDbStatus('err');
-        toast('Ошибка Firebase: ' + err.message, true);
-        fallbackLocal();
-      });
-    } catch(e){
-      setDbStatus('err');
-      fallbackLocal();
-    }
-  } else {
-    document.getElementById('setup-notice').classList.add('show');
-    setDbStatus('warn');
-    fallbackLocal();
+      db=firebase.database();
+      db.ref('properties').on('value',function(s){
+        props=s.val()||{}; fbOk=true;
+        setDot('ok'); renderAll();
+      },function(e){ setDot('err'); toast(e.message,true); loadLocal(); });
+      return;
+    }catch(e){ setDot('err'); }
   }
+  document.getElementById('notice').classList.add('show');
+  setDot('warn');
+  loadLocal();
 }
 
-function fallbackLocal(){
-  try{ props = JSON.parse(localStorage.getItem('haven_props')) || {}; } catch(e){ props={}; }
+function loadLocal(){
+  try{ props=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ props={}; }
   renderAll();
 }
 
-function saveLocal(){ localStorage.setItem('haven_props', JSON.stringify(props)); }
+function saveLocal(){ localStorage.setItem(KEY,JSON.stringify(props)); }
 
-function setDbStatus(s){
-  var dot   = document.getElementById('db-dot');
-  var label = document.getElementById('db-label');
-  dot.className = 'db-dot';
-  if(s==='ok')      { dot.classList.add('green'); label.textContent = '● База данных подключена'; }
-  else if(s==='err'){ dot.classList.add('red');   label.textContent = '● Ошибка подключения'; }
-  else if(s==='warn'){ label.textContent = '● Работает локально'; }
-  else              { label.textContent = 'Подключение...'; }
+function setDot(s){
+  var d=document.getElementById('db-dot'), l=document.getElementById('db-lbl');
+  d.className='db-dot';
+  if(s==='ok'){ d.classList.add('green'); l.textContent='● Подключено'; }
+  else if(s==='err'){ d.classList.add('red'); l.textContent='● Ошибка'; }
+  else if(s==='warn'){ l.textContent='● Локальный режим'; }
+  else { l.textContent='Подключение...'; }
 }
 
-/* ─── WRITE HELPERS ─── */
-function writeProp(id, data, cb){
-  if(fbOk && db){
+function writeProp(id,data,cb){
+  if(fbOk&&db){
     db.ref('properties/'+id).set(data).then(cb).catch(function(e){ toast(e.message,true); });
-  } else {
-    props[id] = data; saveLocal(); renderAll(); if(cb) cb();
-  }
+  } else { props[id]=data; saveLocal(); renderAll(); if(cb)cb(); }
 }
 
-function updateProp(id, data, cb){
-  if(fbOk && db){
+function updateProp(id,data,cb){
+  if(fbOk&&db){
     db.ref('properties/'+id).update(data).then(cb).catch(function(e){ toast(e.message,true); });
-  } else {
-    Object.assign(props[id], data); saveLocal(); renderAll(); if(cb) cb();
-  }
+  } else { Object.assign(props[id],data); saveLocal(); renderAll(); if(cb)cb(); }
 }
 
-function deletePropDB(id, cb){
-  if(fbOk && db){
+function delPropDB(id,cb){
+  if(fbOk&&db){
     db.ref('properties/'+id).remove().then(cb).catch(function(e){ toast(e.message,true); });
-  } else {
-    delete props[id]; saveLocal(); renderAll(); if(cb) cb();
-  }
+  } else { delete props[id]; saveLocal(); renderAll(); if(cb)cb(); }
 }
 
-/* ─── RENDER ─── */
+/* ── RENDER ── */
 function renderAll(){ renderStats(); renderCards(); }
 
 function renderStats(){
-  var all  = Object.values(props);
-  var act  = all.filter(function(p){ return !p.sold; });
-  document.getElementById('stat-total').textContent = all.length;
-  document.getElementById('stat-sale').textContent  = act.filter(function(p){ return p.deal==='buy'; }).length;
-  document.getElementById('stat-rent').textContent  = act.filter(function(p){ return p.deal==='rent'; }).length;
-  document.getElementById('stat-sold').textContent  = all.filter(function(p){ return p.sold; }).length;
+  var all=Object.values(props);
+  var act=all.filter(function(p){return !p.sold;});
+  document.getElementById('s-total').textContent=all.length;
+  document.getElementById('s-sale').textContent=act.filter(function(p){return p.deal==='buy';}).length;
+  document.getElementById('s-rent').textContent=act.filter(function(p){return p.deal==='rent';}).length;
+  document.getElementById('s-sold').textContent=all.filter(function(p){return p.sold;}).length;
 }
 
 function renderCards(){
-  var all = Object.values(props).sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); });
-  var filtered = all.filter(function(p){
+  var all=Object.values(props).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+  var list=all.filter(function(p){
     if(curFilter==='active') return !p.sold;
-    if(curFilter==='buy')    return p.deal==='buy' && !p.sold;
-    if(curFilter==='rent')   return p.deal==='rent' && !p.sold;
+    if(curFilter==='buy')    return p.deal==='buy'&&!p.sold;
+    if(curFilter==='rent')   return p.deal==='rent'&&!p.sold;
     if(curFilter==='sold')   return p.sold;
     return true;
   });
 
-  document.getElementById('listings-count').textContent =
-    'Объекты на сайте (' + filtered.length + ')';
-
-  var c = document.getElementById('prop-cards');
-  if(!filtered.length){
-    c.innerHTML = '<div class="empty-state"><div class="empty-icon">🏠</div><div class="empty-text">' +
-      (curFilter==='sold' ? 'Нет проданных / сданных объектов' : 'Нет объектов. Добавьте первый!') +
-      '</div></div>';
+  document.getElementById('lst-count').textContent='Объекты на сайте ('+list.length+')';
+  var c=document.getElementById('prop-list');
+  if(!list.length){
+    c.innerHTML='<div class="empty-st"><div class="empty-ic">🏠</div><div class="empty-tx">'+(curFilter==='sold'?'Нет проданных':'Нет объектов — добавьте первый!')+'</div></div>';
     return;
   }
+  c.innerHTML='';
+  list.forEach(function(p){
+    var row=document.createElement('div');
+    row.className='prow'+(p.sold?' sold':'');
+    var nameRu=p.nameRu||p.name||'—';
 
-  c.innerHTML = '';
-  filtered.forEach(function(p){
-    var card = document.createElement('div');
-    card.className = 'prop-card' + (p.sold ? ' is-sold' : '');
+    // Показываем фото: base64 или url
+    var imgSrc = p.imgBase64 || p.img || '';
+    var imgHtml = imgSrc
+      ? '<img class="pthumb" src="'+imgSrc+'" onerror="this.parentNode.innerHTML=\'<div class=pph>🏠</div>\'">'
+      : '<div class="pph">🏠</div>';
 
-    var imgHtml = p.img
-      ? '<img class="prop-img" src="'+p.img+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">' +
-        '<div class="prop-img-ph" style="display:none">🏠</div>'
-      : '<div class="prop-img-ph">🏠</div>';
+    var bdg=p.sold
+      ?'<span class="pbadge sold-b">Продано</span>'
+      :'<span class="pbadge '+(p.deal==='buy'?'buy':'rent')+'">'+(p.deal==='buy'?'Продажа':'Аренда')+'</span>';
 
-    var badge = p.sold
-      ? '<span class="badge badge-sold">Продано/Сдано</span>'
-      : '<span class="badge '+(p.deal==='buy'?'badge-buy':'badge-rent')+'">'+(p.deal==='buy'?'Продажа':'Аренда')+'</span>';
-
-    var togLabel = p.sold ? '↩ Вернуть' : '✓ Продано';
-
-    card.innerHTML =
-      imgHtml +
-      '<div class="prop-body">' +
-        '<div class="prop-info">' +
-          '<div class="prop-name">' + (p.name||'—') + '</div>' +
-          '<div class="prop-meta">' + badge +
-            '<span>'+(p.type==='house'?'Дом/Вилла':'Квартира')+'</span>' +
-            '<span>📍'+(p.location||'—')+'</span>' +
-            '<span>'+(p.beds||'?')+' сп · '+(p.area||'?')+' м²</span>' +
-          '</div>' +
-          '<div class="prop-price">'+(p.priceDisplay||'€ —')+'</div>' +
-        '</div>' +
-        '<div class="prop-actions">' +
-          '<button class="act act-edit" data-id="'+p.id+'">✏ Изменить</button>' +
-          '<button class="act act-sold" data-id="'+p.id+'">'+togLabel+'</button>' +
-          '<button class="act act-delete" data-id="'+p.id+'">✕ Удалить</button>' +
-        '</div>' +
+    row.innerHTML=
+      imgHtml+
+      '<div class="pbody">'+
+        '<div class="pname">'+nameRu+'</div>'+
+        '<div class="pmeta">'+bdg+
+          '<span>'+(p.type==='house'?'Дом':'Квартира')+'</span>'+
+          '<span>📍'+(p.location||'—')+'</span>'+
+          '<span>'+(p.beds||'?')+' сп · '+(p.area||'?')+' м²</span>'+
+        '</div>'+
+        '<div class="pprice">'+(p.priceDisplay||'€ —')+'</div>'+
+      '</div>'+
+      '<div class="pacts">'+
+        '<button class="act act-e" data-id="'+p.id+'">✏ Изменить</button>'+
+        '<button class="act act-s" data-id="'+p.id+'">'+(p.sold?'↩ Вернуть':'✓ Продано')+'</button>'+
+        '<button class="act act-d" data-id="'+p.id+'">✕ Удалить</button>'+
       '</div>';
-    c.appendChild(card);
+    c.appendChild(row);
   });
 
-  c.querySelectorAll('.act-edit').forEach(function(b){
-    b.addEventListener('click', function(){ openEditModal(b.getAttribute('data-id')); }); });
-  c.querySelectorAll('.act-sold').forEach(function(b){
-    b.addEventListener('click', function(){ toggleSold(b.getAttribute('data-id')); }); });
-  c.querySelectorAll('.act-delete').forEach(function(b){
-    b.addEventListener('click', function(){ deleteConfirm(b.getAttribute('data-id')); }); });
+  c.querySelectorAll('.act-e').forEach(function(b){ b.addEventListener('click',function(){ openEdit(b.getAttribute('data-id')); }); });
+  c.querySelectorAll('.act-s').forEach(function(b){ b.addEventListener('click',function(){ toggleSold(b.getAttribute('data-id')); }); });
+  c.querySelectorAll('.act-d').forEach(function(b){ b.addEventListener('click',function(){ delConfirm(b.getAttribute('data-id')); }); });
 }
 
-/* ─── FILTER TABS ─── */
-document.querySelectorAll('.filter-tab').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    document.querySelectorAll('.filter-tab').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    curFilter = btn.getAttribute('data-f');
-    renderCards();
+/* ── FILTER ── */
+document.querySelectorAll('.ftab').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.ftab').forEach(function(b){b.classList.remove('on');});
+    btn.classList.add('on'); curFilter=btn.getAttribute('data-f'); renderCards();
   });
 });
 
-/* ─── TYPE / DEAL TOGGLES ─── */
+/* ── TYPE / DEAL TOGGLES ── */
 document.querySelectorAll('[data-type]').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    document.querySelectorAll('[data-type]').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    addType = btn.getAttribute('data-type');
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('[data-type]').forEach(function(b){b.classList.remove('on');});
+    btn.classList.add('on'); addType=btn.getAttribute('data-type');
   });
 });
 document.querySelectorAll('[data-deal]').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    document.querySelectorAll('[data-deal]').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    addDeal = btn.getAttribute('data-deal');
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('[data-deal]').forEach(function(b){b.classList.remove('on');});
+    btn.classList.add('on'); addDeal=btn.getAttribute('data-deal');
   });
 });
 
-/* ─── ADD PROPERTY ─── */
-document.getElementById('add-btn').addEventListener('click', addProperty);
+/* ── LANG TABS (форма добавления) ── */
+document.querySelectorAll('[data-lt]').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('[data-lt]').forEach(function(t){t.classList.remove('on');});
+    tab.classList.add('on');
+    var l=tab.getAttribute('data-lt');
+    ['ru','en','es'].forEach(function(x){
+      document.getElementById('lp-'+x).classList.toggle('on', x===l);
+    });
+  });
+});
 
-function addProperty(){
-  var name     = document.getElementById('f-name').value.trim();
-  var loc      = document.getElementById('f-loc').value.trim();
-  var priceNum = parseFloat(document.getElementById('f-price').value)||0;
+/* ── LANG TABS удобства (форма добавления) ── */
+document.querySelectorAll('[data-at]').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('[data-at]').forEach(function(t){t.classList.remove('on');});
+    tab.classList.add('on');
+    var l=tab.getAttribute('data-at');
+    ['ru','en','es'].forEach(function(x){ document.getElementById('ap-'+x).classList.toggle('on',x===l); });
+  });
+});
+document.querySelectorAll('[data-dt]').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('[data-dt]').forEach(function(t){t.classList.remove('on');});
+    tab.classList.add('on');
+    var l=tab.getAttribute('data-dt');
+    ['ru','en','es'].forEach(function(x){ document.getElementById('dp-'+x).classList.toggle('on',x===l); });
+  });
+});
+/* ── LANG TABS удобства (модалка) ── */
+document.querySelectorAll('[data-eat]').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('[data-eat]').forEach(function(t){t.classList.remove('on');});
+    tab.classList.add('on');
+    var l=tab.getAttribute('data-eat');
+    ['ru','en','es'].forEach(function(x){ document.getElementById('eap-'+x).classList.toggle('on',x===l); });
+  });
+});
+document.querySelectorAll('[data-edt]').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('[data-edt]').forEach(function(t){t.classList.remove('on');});
+    tab.classList.add('on');
+    var l=tab.getAttribute('data-edt');
+    ['ru','en','es'].forEach(function(x){ document.getElementById('edp-'+x).classList.toggle('on',x===l); });
+  });
+});
+document.querySelectorAll('[data-elt]').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('[data-elt]').forEach(function(t){t.classList.remove('on');});
+    tab.classList.add('on');
+    var l=tab.getAttribute('data-elt');
+    ['ru','en','es'].forEach(function(x){
+      document.getElementById('elp-'+x).classList.toggle('on', x===l);
+    });
+  });
+});
 
-  if(!name || !loc || !priceNum){
-    setFormMsg('Заполните: название, расположение и цену', true);
+/* ── ЗАГРУЗКА ФОТО ── */
+function handleFileSelect(input, mode){
+  var file = input.files[0];
+  if(!file) return;
+  if(file.size > 5*1024*1024){
+    toast('Файл слишком большой. Максимум 5 МБ', true);
     return;
   }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var base64 = e.target.result;
+    if(mode === 'add'){
+      addImgBase64 = base64;
+      document.getElementById('f-img').value = '';
+      showPreview('add-preview', base64);
+    } else {
+      editImgBase64 = base64;
+      document.getElementById('e-img').value = '';
+      showPreview('edit-preview', base64);
+    }
+  };
+  reader.readAsDataURL(file);
+}
 
-  var priceTxt = document.getElementById('f-price-txt').value.trim() ||
-                 ('€ ' + priceNum.toLocaleString('de-DE'));
-  var amenStr  = document.getElementById('f-amen').value.trim();
-  var id       = 'p' + Date.now();
+function showPreview(id, src){
+  var img = document.getElementById(id);
+  img.src = src;
+  img.classList.add('show');
+}
 
-  var newProp = {
-    id:           id,
-    name:         name,
-    location:     loc,
-    type:         addType,
-    deal:         addDeal,
-    priceNum:     priceNum,
-    priceDisplay: priceTxt,
-    beds:         document.getElementById('f-beds').value.trim(),
-    area:         document.getElementById('f-area').value.trim(),
-    desc:         document.getElementById('f-desc').value.trim(),
-    img:          document.getElementById('f-img').value.trim(),
-    amenities:    amenStr ? amenStr.split(',').map(function(s){ return s.trim(); }) : [],
-    sold:         false,
-    createdAt:    Date.now()
+function previewUrl(url, id){
+  if(url && url.startsWith('http')){
+    showPreview(id, url);
+    // Сбрасываем base64 если вводят ссылку
+    if(id === 'add-preview') addImgBase64 = '';
+    if(id === 'edit-preview') editImgBase64 = '';
+  } else {
+    var img = document.getElementById(id);
+    if(!img.src.startsWith('data:')) img.classList.remove('show');
+  }
+}
+
+/* Drag & drop */
+var dropZone = document.getElementById('photo-drop');
+dropZone.addEventListener('dragover', function(e){ e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', function(){ dropZone.classList.remove('drag'); });
+dropZone.addEventListener('drop', function(e){
+  e.preventDefault(); dropZone.classList.remove('drag');
+  var file = e.dataTransfer.files[0];
+  if(file && file.type.startsWith('image/')){
+    var fakeInput = { files: [file] };
+    handleFileSelect(fakeInput, 'add');
+  }
+});
+
+/* ── ДОБАВИТЬ ── */
+document.getElementById('add-btn').addEventListener('click', function(){
+  var nameRu = document.getElementById('f-name-ru').value.trim();
+  var loc    = document.getElementById('f-loc').value.trim();
+  var price  = parseFloat(document.getElementById('f-price').value)||0;
+
+  if(!nameRu||!loc||!price){ setMsg('Заполните: название (RU), расположение и цену',true); return; }
+
+  var priceTxt = document.getElementById('f-price-txt').value.trim()||('€ '+price.toLocaleString('de-DE'));
+  var amenStr  = document.getElementById('f-amen-ru').value.trim();
+  var amenEn   = document.getElementById('f-amen-en').value.trim();
+  var amenEs   = document.getElementById('f-amen-es').value.trim();
+  var detRu    = document.getElementById('f-det-ru').value.trim();
+  var detEn    = document.getElementById('f-det-en').value.trim();
+  var detEs    = document.getElementById('f-det-es').value.trim();
+
+  function parseDetails(txt){
+    if(!txt) return [];
+    return txt.split('\n').map(function(line){
+      var parts=line.split(':'); if(parts.length<2) return null;
+      return [parts[0].trim(), parts.slice(1).join(':').trim()];
+    }).filter(Boolean);
+  }
+  var imgUrl   = document.getElementById('f-img').value.trim();
+  var id       = 'p'+Date.now();
+
+  var np = {
+    id: id,
+    nameRu:  nameRu,
+    nameEn:  document.getElementById('f-name-en').value.trim()||nameRu,
+    nameEs:  document.getElementById('f-name-es').value.trim()||nameRu,
+    // для обратной совместимости
+    name:    nameRu,
+    location: loc,
+    type:    addType, deal: addDeal,
+    priceNum: price, priceDisplay: priceTxt,
+    beds: document.getElementById('f-beds').value.trim(),
+    area: document.getElementById('f-area').value.trim(),
+    desc: document.getElementById('f-desc').value.trim(),
+    img:  imgUrl,
+    imgBase64: addImgBase64 || '',
+    amenities:   amenStr ? amenStr.split(',').map(function(s){return s.trim();}) : [],
+    amenitiesEn: amenEn  ? amenEn.split(',').map(function(s){return s.trim();})  : [],
+    amenitiesEs: amenEs  ? amenEs.split(',').map(function(s){return s.trim();})  : [],
+    detailsRu:   parseDetails(detRu),
+    detailsEn:   parseDetails(detEn),
+    detailsEs:   parseDetails(detEs),
+    sold: false, createdAt: Date.now()
   };
 
   document.getElementById('add-btn').disabled = true;
-  writeProp(id, newProp, function(){
-    clearAddForm();
+  writeProp(id, np, function(){
+    clearForm();
     document.getElementById('add-btn').disabled = false;
-    setFormMsg('✓ Объект «'+name+'» опубликован на сайте!', false);
-    toast('✓ «'+name+'» добавлен на сайт');
-    setTimeout(function(){ setFormMsg('',false); }, 4000);
+    setMsg('✓ «'+nameRu+'» опубликован на сайте!', false);
+    toast('✓ «'+nameRu+'» добавлен');
+    setTimeout(function(){setMsg('',false);},4000);
   });
-}
+});
 
-function clearAddForm(){
-  ['f-name','f-loc','f-price','f-price-txt','f-beds','f-area','f-desc','f-img','f-amen'].forEach(function(id){
-    document.getElementById(id).value = '';
+function clearForm(){
+  ['f-name-ru','f-name-en','f-name-es','f-loc','f-price','f-price-txt','f-beds','f-area','f-desc','f-img',
+   'f-amen-ru','f-amen-en','f-amen-es','f-det-ru','f-det-en','f-det-es'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
   });
   document.getElementById('add-preview').classList.remove('show');
-  addType = 'apartment'; addDeal = 'buy';
-  document.querySelectorAll('[data-type]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-type')==='apartment'); });
-  document.querySelectorAll('[data-deal]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-deal')==='buy'); });
+  document.getElementById('add-preview').src='';
+  document.getElementById('f-file').value='';
+  addImgBase64='';
+  addType='apartment'; addDeal='buy';
+  document.querySelectorAll('[data-type]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-type')==='apartment');});
+  document.querySelectorAll('[data-deal]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-deal')==='buy');});
 }
 
-function setFormMsg(text, isErr){
-  var el = document.getElementById('form-msg');
-  el.style.color = isErr ? '#c47070' : '#4a7a4a';
-  el.textContent = text;
+function setMsg(t,err){
+  var el=document.getElementById('form-msg');
+  el.style.color=err?'#c47070':'#4a7a4a';
+  el.textContent=t;
 }
 
-/* ─── DELETE ─── */
-function deleteConfirm(id){
-  var p = props[id];
-  var name = p ? p.name : 'этот объект';
-  if(!confirm('Удалить «'+name+'»?\n\nОн сразу исчезнет с сайта для всех клиентов.\nЭто действие нельзя отменить.')) return;
-  deletePropDB(id, function(){
-    toast('«'+name+'» удалён с сайта');
-  });
+/* ── DELETE / TOGGLE ── */
+function delConfirm(id){
+  var p=props[id], nm=p?p.nameRu||p.name:'объект';
+  if(!confirm('Удалить «'+nm+'»?\nОн сразу исчезнет с сайта.')) return;
+  delPropDB(id,function(){ toast('«'+nm+'» удалён'); });
 }
 
-/* ─── TOGGLE SOLD ─── */
 function toggleSold(id){
-  var p = props[id];
-  if(!p) return;
-  var newSold = !p.sold;
-  var msg = newSold
-    ? '«'+p.name+'» — пометить как «Продано / Сдано»?\n\nОбъект скроется с сайта для клиентов.'
-    : '«'+p.name+'» — вернуть в активные?\n\nКлиенты снова увидят его на сайте.';
-  if(!confirm(msg)) return;
-  updateProp(id, { sold: newSold }, function(){
-    toast(newSold ? '«'+p.name+'» скрыт с сайта' : '«'+p.name+'» снова на сайте');
-  });
+  var p=props[id]; if(!p) return;
+  var ns=!p.sold;
+  var nm=p.nameRu||p.name||'объект';
+  if(!confirm(ns?'Пометить «'+nm+'» как Продано/Сдано?\nСкроется с сайта.':'Вернуть «'+nm+'» в активные?\nКлиенты снова увидят.')) return;
+  updateProp(id,{sold:ns},function(){ toast(ns?'«'+nm+'» скрыт':'«'+nm+'» снова на сайте'); });
 }
 
-/* ─── EDIT MODAL ─── */
-function openEditModal(id){
-  var p = props[id];
-  if(!p) return;
-  document.getElementById('e-id').value       = id;
-  document.getElementById('e-name').value     = p.name||'';
-  document.getElementById('e-loc').value      = p.location||'';
-  document.getElementById('e-type').value     = p.type||'apartment';
-  document.getElementById('e-deal').value     = p.deal||'buy';
-  document.getElementById('e-price').value    = p.priceNum||'';
-  document.getElementById('e-price-txt').value= p.priceDisplay||'';
-  document.getElementById('e-beds').value     = p.beds||'';
-  document.getElementById('e-area').value     = p.area||'';
-  document.getElementById('e-desc').value     = p.desc||'';
-  document.getElementById('e-img').value      = p.img||'';
-  document.getElementById('e-amen').value     = (p.amenities||[]).join(', ');
-  previewImg(p.img||'', 'e-preview');
+/* ── EDIT MODAL ── */
+function openEdit(id){
+  var p=props[id]; if(!p) return;
+  editImgBase64='';
+  document.getElementById('e-id').value    = id;
+  document.getElementById('e-name-ru').value = p.nameRu||p.name||'';
+  document.getElementById('e-name-en').value = p.nameEn||'';
+  document.getElementById('e-name-es').value = p.nameEs||'';
+  document.getElementById('e-loc').value   = p.location||'';
+  document.getElementById('e-type').value  = p.type||'apartment';
+  document.getElementById('e-deal').value  = p.deal||'buy';
+  document.getElementById('e-price').value = p.priceNum||'';
+  document.getElementById('e-price-txt').value = p.priceDisplay||'';
+  document.getElementById('e-beds').value  = p.beds||'';
+  document.getElementById('e-area').value  = p.area||'';
+  document.getElementById('e-desc').value  = p.desc||'';
+  document.getElementById('e-img').value   = p.img||'';
+  document.getElementById('e-amen-ru').value  = (p.amenities||[]).join(', ');
+  document.getElementById('e-amen-en').value  = (p.amenitiesEn||[]).join(', ');
+  document.getElementById('e-amen-es').value  = (p.amenitiesEs||[]).join(', ');
+  document.getElementById('e-det-ru').value   = (p.detailsRu||[]).map(function(d){return d[0]+': '+d[1];}).join('\n');
+  document.getElementById('e-det-en').value   = (p.detailsEn||[]).map(function(d){return d[0]+': '+d[1];}).join('\n');
+  document.getElementById('e-det-es').value   = (p.detailsEs||[]).map(function(d){return d[0]+': '+d[1];}).join('\n');
+  document.getElementById('e-file').value  = '';
+
+  var prev = document.getElementById('edit-preview');
+  var src = p.imgBase64||p.img||'';
+  if(src){ prev.src=src; prev.classList.add('show'); } else { prev.classList.remove('show'); }
+
   document.getElementById('edit-modal').classList.add('open');
 }
 
-document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-x').addEventListener('click', closeModal);
 document.getElementById('modal-cancel').addEventListener('click', closeModal);
-document.getElementById('edit-modal').addEventListener('click', function(e){
-  if(e.target===this) closeModal();
-});
+document.getElementById('edit-modal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
 function closeModal(){ document.getElementById('edit-modal').classList.remove('open'); }
 
 document.getElementById('modal-save').addEventListener('click', function(){
-  var id  = document.getElementById('e-id').value;
-  var amenStr = document.getElementById('e-amen').value.trim();
-  var priceNum = parseFloat(document.getElementById('e-price').value)||0;
-  var priceTxt = document.getElementById('e-price-txt').value.trim() ||
-                 (priceNum ? '€ '+priceNum.toLocaleString('de-DE') : '');
-  var updates = {
-    name:         document.getElementById('e-name').value.trim(),
-    location:     document.getElementById('e-loc').value.trim(),
-    type:         document.getElementById('e-type').value,
-    deal:         document.getElementById('e-deal').value,
-    priceNum:     priceNum,
-    priceDisplay: priceTxt,
-    beds:         document.getElementById('e-beds').value.trim(),
-    area:         document.getElementById('e-area').value.trim(),
-    desc:         document.getElementById('e-desc').value.trim(),
-    img:          document.getElementById('e-img').value.trim(),
-    amenities:    amenStr ? amenStr.split(',').map(function(s){return s.trim();}) : []
+  var id=document.getElementById('e-id').value;
+  var nameRu=document.getElementById('e-name-ru').value.trim();
+  var priceNum=parseFloat(document.getElementById('e-price').value)||0;
+  var priceTxt=document.getElementById('e-price-txt').value.trim()||(priceNum?'€ '+priceNum.toLocaleString('de-DE'):'');
+
+  function parseDetails(txt){
+    if(!txt) return [];
+    return txt.split('\n').map(function(line){
+      var parts=line.split(':'); if(parts.length<2) return null;
+      return [parts[0].trim(), parts.slice(1).join(':').trim()];
+    }).filter(Boolean);
+  }
+
+  var aRu=document.getElementById('e-amen-ru').value.trim();
+  var aEn=document.getElementById('e-amen-en').value.trim();
+  var aEs=document.getElementById('e-amen-es').value.trim();
+
+  var updates={
+    nameRu: nameRu,
+    nameEn: document.getElementById('e-name-en').value.trim()||nameRu,
+    nameEs: document.getElementById('e-name-es').value.trim()||nameRu,
+    name:   nameRu,
+    location: document.getElementById('e-loc').value.trim(),
+    type: document.getElementById('e-type').value,
+    deal: document.getElementById('e-deal').value,
+    priceNum: priceNum, priceDisplay: priceTxt,
+    beds: document.getElementById('e-beds').value.trim(),
+    area: document.getElementById('e-area').value.trim(),
+    desc: document.getElementById('e-desc').value.trim(),
+    img:  document.getElementById('e-img').value.trim(),
+    amenities:   aRu ? aRu.split(',').map(function(s){return s.trim();}) : [],
+    amenitiesEn: aEn ? aEn.split(',').map(function(s){return s.trim();}) : [],
+    amenitiesEs: aEs ? aEs.split(',').map(function(s){return s.trim();}) : [],
+    detailsRu: parseDetails(document.getElementById('e-det-ru').value.trim()),
+    detailsEn: parseDetails(document.getElementById('e-det-en').value.trim()),
+    detailsEs: parseDetails(document.getElementById('e-det-es').value.trim()),
   };
+
+  if(editImgBase64) updates.imgBase64 = editImgBase64;
+
   updateProp(id, updates, function(){
     closeModal();
     toast('Изменения сохранены');
   });
 });
 
-/* ─── PREVIEW IMAGE ─── */
-function previewImg(url, targetId){
-  var img = document.getElementById(targetId);
-  if(!img) return;
-  if(url && url.startsWith('http')){
-    img.src = url;
-    img.classList.add('show');
-    img.onerror = function(){ img.classList.remove('show'); };
-  } else {
-    img.classList.remove('show');
-  }
-}
-
-/* ─── TOAST ─── */
-function toast(msg, isErr){
-  var el = document.getElementById('toast');
-  el.textContent = msg;
-  el.style.background = isErr ? '#8B3A3A' : '#1A1714';
+/* ── TOAST ── */
+function toast(msg,err){
+  var el=document.getElementById('toast');
+  el.textContent=msg;
+  el.style.background=err?'#8B3A3A':'#1A1714';
   el.classList.add('show');
-  setTimeout(function(){ el.classList.remove('show'); }, 3000);
+  setTimeout(function(){el.classList.remove('show');},3000);
 }
 </script>
 </body>

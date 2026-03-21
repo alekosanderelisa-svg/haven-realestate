@@ -315,9 +315,9 @@ window.havenConvertProp = function(p) {
     deal: p.deal || 'buy',
     priceNum: p.priceNum || 0,
     images: [
-      p.img || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1400&q=80',
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80'
+      p.imgBase64 || p.img || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1400&q=80',
+      p.imgBase64 || p.img || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+      p.imgBase64 || p.img || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80'
     ],
     ru: {
       badge: p.deal === 'rent' ? 'Аренда' : 'Продажа',
@@ -334,7 +334,7 @@ window.havenConvertProp = function(p) {
         { i: '🏠', v: p.type === 'house' ? 'Дом' : 'Кварт.', l: 'Тип' }
       ],
       amen: p.amenities || [],
-      det: [
+      det: (p.detailsRu && p.detailsRu.length) ? p.detailsRu : [
         ['Тип', p.type === 'house' ? 'Дом / Вилла' : 'Квартира'],
         ['Сделка', p.deal === 'rent' ? 'Аренда' : 'Продажа'],
         ['Цена', p.priceDisplay || '—'],
@@ -359,8 +359,8 @@ window.havenConvertProp = function(p) {
         { i: '📍', v: (p.location||'').split(',')[0] || '—', l: 'City' },
         { i: '🏠', v: p.type === 'house' ? 'House' : 'Apt.', l: 'Type' }
       ],
-      amen: p.amenities || [],
-      det: [
+      amen: (p.amenitiesEn && p.amenitiesEn.length) ? p.amenitiesEn : (p.amenities || []),
+      det: (p.detailsEn && p.detailsEn.length) ? p.detailsEn : [
         ['Type', p.type === 'house' ? 'House / Villa' : 'Apartment'],
         ['Deal', p.deal === 'rent' ? 'For Rent' : 'For Sale'],
         ['Price', p.priceDisplay || '—'],
@@ -385,8 +385,8 @@ window.havenConvertProp = function(p) {
         { i: '📍', v: (p.location||'').split(',')[0] || '—', l: 'Ciudad' },
         { i: '🏠', v: p.type === 'house' ? 'Casa' : 'Apto.', l: 'Tipo' }
       ],
-      amen: p.amenities || [],
-      det: [
+      amen: (p.amenitiesEs && p.amenitiesEs.length) ? p.amenitiesEs : (p.amenities || []),
+      det: (p.detailsEs && p.detailsEs.length) ? p.detailsEs : [
         ['Tipo', p.type === 'house' ? 'Casa / Villa' : 'Apartamento'],
         ['Operación', p.deal === 'rent' ? 'Alquiler' : 'En Venta'],
         ['Precio', p.priceDisplay || '—'],

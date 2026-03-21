@@ -90,6 +90,20 @@
 </head>
 <body class="lang-ru">
 
+  <!-- МОБИЛЬНОЕ МЕНЮ -->
+  <div class="mobile-menu" id="mobile-menu">
+    <button class="mob-close" id="mob-close">✕</button>
+    <a href="apartments.html" id="mob-apts">Квартиры</a>
+    <a href="houses.html" id="mob-houses">Дома</a>
+    <a href="#services" id="mob-services" onclick="closeMobMenu()">Услуги</a>
+    <a href="#contact" id="mob-contact" onclick="closeMobMenu()">Контакты</a>
+    <div class="mob-langs">
+      <button class="mob-lang-btn active" data-mob-lang="ru">RU</button>
+      <button class="mob-lang-btn" data-mob-lang="en">EN</button>
+      <button class="mob-lang-btn" data-mob-lang="es">ES</button>
+    </div>
+  </div>
+
   <nav id="nav">
     <a class="logo" href="index.html">HAVEN</a>
     <ul class="nav-links">
@@ -111,6 +125,10 @@
       <button class="lang-btn" data-set-lang="en">EN</button>
       <button class="lang-btn" data-set-lang="es">ES</button>
     </div>
+    <!-- Бургер для мобилки -->
+    <button class="burger" id="burger" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </button>
     <button class="nav-btn" id="nav-consult-btn" data-lang="ru">Консультация</button>
     <button class="nav-btn" id="nav-consult-btn-en" data-lang="en">Consultation</button>
     <button class="nav-btn" id="nav-consult-btn-es" data-lang="es">Consulta</button>
@@ -236,9 +254,7 @@
           <div class="prop-badge" data-lang="ru">Премиум</div><div class="prop-badge" data-lang="en">Premium</div><div class="prop-badge" data-lang="es">Premium</div>
           <div class="prop-name" data-lang="ru">Вилла «Лагуна»</div><div class="prop-name" data-lang="en">Villa Laguna</div><div class="prop-name" data-lang="es">Villa Laguna</div>
           <div class="prop-loc">📍 Torrevieja, Costa Blanca</div>
-          <div class="prop-row"   data-lang="ru"><div class="prop-price">€ 1 290 000</div><div class="prop-meta"><span>5</span><span>380 м²</span></div></div>
-          <div class="prop-row"   data-lang="en"><div class="prop-price">€ 1,290,000</div><div class="prop-meta"><span>5</span><span>380 m²</span></div></div>
-          <div class="prop-row"   data-lang="es"><div class="prop-price">€ 1.290.000</div><div class="prop-meta"><span>5</span><span>380 m²</span></div></div>
+          <div class="prop-row"><div class="prop-price">€ 1 290 000</div><div class="prop-meta"><span>5</span><span>380 м²</span></div></div>
         </div>
       </div>
       <div class="prop-card" data-id="apt-punta-prima">
@@ -247,9 +263,7 @@
           <div class="prop-badge" data-lang="ru">Новостройка</div><div class="prop-badge" data-lang="en">New Build</div><div class="prop-badge" data-lang="es">Obra Nueva</div>
           <div class="prop-name" data-lang="ru">Апарт. «Соль»</div><div class="prop-name" data-lang="en">Sol Apartments</div><div class="prop-name" data-lang="es">Aptos. Sol</div>
           <div class="prop-loc">📍 Punta Prima</div>
-          <div class="prop-row"   data-lang="ru"><div class="prop-price">€ 285 000</div><div class="prop-meta"><span>2</span><span>95 м²</span></div></div>
-          <div class="prop-row"   data-lang="en"><div class="prop-price">€ 285,000</div><div class="prop-meta"><span>2</span><span>95 m²</span></div></div>
-          <div class="prop-row"   data-lang="es"><div class="prop-price">€ 285.000</div><div class="prop-meta"><span>2</span><span>95 m²</span></div></div>
+          <div class="prop-row"><div class="prop-price">€ 285 000</div><div class="prop-meta"><span>2</span><span>95 м²</span></div></div>
         </div>
       </div>
       <div class="prop-card" data-id="villa-punta-prima">
@@ -258,9 +272,7 @@
           <div class="prop-badge" data-lang="ru">Продажа</div><div class="prop-badge" data-lang="en">For Sale</div><div class="prop-badge" data-lang="es">En Venta</div>
           <div class="prop-name" data-lang="ru">Вилла «Мар»</div><div class="prop-name" data-lang="en">Villa Mar</div><div class="prop-name" data-lang="es">Villa Mar</div>
           <div class="prop-loc">📍 Punta Prima</div>
-          <div class="prop-row"   data-lang="ru"><div class="prop-price">€ 780 000</div><div class="prop-meta"><span>4</span><span>280 м²</span></div></div>
-          <div class="prop-row"   data-lang="en"><div class="prop-price">€ 780,000</div><div class="prop-meta"><span>4</span><span>280 m²</span></div></div>
-          <div class="prop-row"   data-lang="es"><div class="prop-price">€ 780.000</div><div class="prop-meta"><span>4</span><span>280 m²</span></div></div>
+          <div class="prop-row"><div class="prop-price">€ 780 000</div><div class="prop-meta"><span>4</span><span>280 м²</span></div></div>
         </div>
       </div>
       <div class="prop-card" data-id="apt-torrevieja-rent">
@@ -269,9 +281,7 @@
           <div class="prop-badge" style="background:var(--warm);color:var(--cream)" data-lang="ru">Аренда</div><div class="prop-badge" style="background:var(--warm);color:var(--cream)" data-lang="en">For Rent</div><div class="prop-badge" style="background:var(--warm);color:var(--cream)" data-lang="es">Alquiler</div>
           <div class="prop-name" data-lang="ru">Апарт. «Фиеста»</div><div class="prop-name" data-lang="en">Fiesta Apts</div><div class="prop-name" data-lang="es">Aptos. Fiesta</div>
           <div class="prop-loc">📍 Torrevieja, Centro</div>
-          <div class="prop-row"   data-lang="ru"><div class="prop-price">€ 1 800/мес</div><div class="prop-meta"><span>3</span><span>110 м²</span></div></div>
-          <div class="prop-row"   data-lang="en"><div class="prop-price">€ 1,800/month</div><div class="prop-meta"><span>3</span><span>110 m²</span></div></div>
-          <div class="prop-row"   data-lang="es"><div class="prop-price">€ 1.800/mes</div><div class="prop-meta"><span>3</span><span>110 m²</span></div></div>
+          <div class="prop-row"><div class="prop-price">€ 1 800/мес</div><div class="prop-meta"><span>3</span><span>110 м²</span></div></div>
         </div>
       </div>
       <div class="prop-card" data-id="apt-torrevieja-2">
@@ -280,9 +290,7 @@
           <div class="prop-badge" data-lang="ru">Инвестиции</div><div class="prop-badge" data-lang="en">Investment</div><div class="prop-badge" data-lang="es">Inversión</div>
           <div class="prop-name" data-lang="ru">Квартира «Бриза»</div><div class="prop-name" data-lang="en">Brisa Apt</div><div class="prop-name" data-lang="es">Apto. Brisa</div>
           <div class="prop-loc">📍 Torrevieja, La Mata</div>
-          <div class="prop-row"   data-lang="ru"><div class="prop-price">€ 165 000</div><div class="prop-meta"><span>2</span><span>72 м²</span></div></div>
-          <div class="prop-row"   data-lang="en"><div class="prop-price">€ 165,000</div><div class="prop-meta"><span>2</span><span>72 m²</span></div></div>
-          <div class="prop-row"   data-lang="es"><div class="prop-price">€ 165.000</div><div class="prop-meta"><span>2</span><span>72 m²</span></div></div>
+          <div class="prop-row"><div class="prop-price">€ 165 000</div><div class="prop-meta"><span>2</span><span>72 м²</span></div></div>
         </div>
       </div>
     </div>
@@ -394,9 +402,9 @@
       <div>
         <div class="f-head" data-lang="ru">Контакты</div><div class="f-head" data-lang="en">Contacts</div><div class="f-head" data-lang="es">Contactos</div>
         <ul class="f-list">
-          <li data-lang="ru"><a href="tel:+34965123456">+34 965 123 456</a></li><li data-lang="ru"><a href="mailto:info@haven.es">info@haven.es</a></li>
-          <li data-lang="en"><a href="tel:+34965123456">+34 965 123 456</a></li><li data-lang="en"><a href="mailto:info@haven.es">info@haven.es</a></li>
-          <li data-lang="es"><a href="tel:+34965123456">+34 965 123 456</a></li><li data-lang="es"><a href="mailto:info@haven.es">info@haven.es</a></li>
+          <li data-lang="ru"><a href="tel:+34965123456">+34 965 123 456</a></li><li data-lang="ru"><a href="/cdn-cgi/l/email-protection#8de4e3ebe2cde5ecfbe8e3a3e8fe"><span class="__cf_email__" data-cfemail="94fdfaf2fbd4fcf5e2f1fabaf1e7">[email&#160;protected]</span></a></li>
+          <li data-lang="en"><a href="tel:+34965123456">+34 965 123 456</a></li><li data-lang="en"><a href="/cdn-cgi/l/email-protection#6f060109002f070e190a01410a1c"><span class="__cf_email__" data-cfemail="01686f676e41696077646f2f6472">[email&#160;protected]</span></a></li>
+          <li data-lang="es"><a href="tel:+34965123456">+34 965 123 456</a></li><li data-lang="es"><a href="/cdn-cgi/l/email-protection#c4adaaa2ab84aca5b2a1aaeaa1b7"><span class="__cf_email__" data-cfemail="71181f171e31191007141f5f1402">[email&#160;protected]</span></a></li>
         </ul>
       </div>
     </div>
@@ -406,9 +414,13 @@
       <div class="f-copy" data-lang="es">2024 HAVEN. Todos los derechos reservados.</div>
       <div class="socials"><a class="soc" href="#">VK</a><a class="soc" href="#">TG</a><a class="soc" href="#">WA</a></div>
     </div>
+    <!-- Кнопка для владельца — незаметная, только для своих -->
+    <div style="text-align:center;padding:12px 0 4px">
+      <a href="admin.html" style="font-size:10px;letter-spacing:1.5px;color:rgba(196,168,130,0.25);text-decoration:none;text-transform:uppercase;transition:color .3s" onmouseover="this.style.color='rgba(196,168,130,0.7)'" onmouseout="this.style.color='rgba(196,168,130,0.25)'">⚙ Управление</a>
+    </div>
   </footer>
 
-  <script src="script.js"></script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js"></script>
   <script src="haven-data.js"></script>
   <script>
   havenInjectOverlay();
@@ -529,7 +541,7 @@
     btn.addEventListener('click', function(){ document.getElementById('contact').scrollIntoView({behavior:'smooth'}); });
   });
   document.querySelectorAll('[id^="btn-listings-"]').forEach(function(btn){
-    btn.addEventListener('click', function(){ document.getElementById('listings').scrollIntoView({behavior:'smooth'}); });
+    btn.adEventListener('click', function(){ document.getElementById('listings').scrollIntoView({behavior:'smooth'}); });
   });
   document.getElementById('submit-btn').addEventListener('click', function(){
     var btn=this, t=UI[lang];
@@ -537,7 +549,51 @@
     setTimeout(function(){ btn.textContent=t.submitBtn; btn.style.background=''; btn.disabled=false; },4000);
   });
 
-  applyLang('ru');
+  applyLang(localStorage.getItem('haven_lang')||'ru');
+
+  // ── БУРГЕР МЕНЮ ──
+  var burger = document.getElementById('burger');
+  var mobMenu = document.getElementById('mobile-menu');
+
+  function openMobMenu(){ burger.classList.add('open'); mobMenu.classList.add('open'); document.body.style.overflow='hidden'; }
+  function closeMobMenu(){ burger.classList.remove('open'); mobMenu.classList.remove('open'); document.body.style.overflow=''; }
+
+  burger.addEventListener('click', function(){ mobMenu.classList.contains('open') ? closeMobMenu() : openMobMenu(); });
+  document.getElementById('mob-close').addEventListener('click', closeMobMenu);
+
+  // Переключение языка из мобильного меню
+  document.querySelectorAll('[data-mob-lang]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var l = btn.getAttribute('data-mob-lang');
+      applyLang(l);
+      document.querySelectorAll('[data-mob-lang]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-mob-lang')===l); });
+      closeMobMenu();
+    });
+  });
+
+  // Обновить текст мобильного меню при смене языка
+  var origApplyLang = applyLang;
+  // Синхронизация мобильного меню с языком
+  function updateMobMenu(l){
+    var links = {
+      ru: { apts:'Квартиры', houses:'Дома', services:'Услуги', contact:'Контакты' },
+      en: { apts:'Apartments', houses:'Houses', services:'Services', contact:'Contact' },
+      es: { apts:'Apartamentos', houses:'Casas', services:'Servicios', contact:'Contacto' }
+    };
+    var t = links[l] || links.ru;
+    document.getElementById('mob-apts').textContent    = t.apts;
+    document.getElementById('mob-houses').textContent  = t.houses;
+    document.getElementById('mob-services').textContent= t.services;
+    document.getElementById('mob-contact').textContent = t.contact;
+    document.querySelectorAll('[data-mob-lang]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-mob-lang')===l); });
+  }
+
+  // Вызывать updateMobMenu при каждом applyLang
+  var _origApply = window.applyLang || applyLang;
+  document.querySelectorAll('.lang-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ updateMobMenu(btn.getAttribute('data-set-lang')); });
+  });
+  updateMobMenu(localStorage.getItem('haven_lang')||'ru');
   </script>
 </body>
 </html>

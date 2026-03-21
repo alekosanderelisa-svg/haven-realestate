@@ -793,3 +793,152 @@ footer {
   footer { padding: 56px 24px 28px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
 }
+
+/* ========================================
+   МОБИЛЬНОЕ МЕНЮ (бургер)
+   ======================================== */
+
+/* Кнопка-бургер */
+.burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  z-index: 200;
+}
+.burger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--dark);
+  transition: all 0.35s;
+  transform-origin: center;
+}
+nav.sticky .burger span { background: var(--dark); }
+.hero .burger span,
+nav:not(.sticky) .burger span { background: var(--cream); }
+
+/* Анимация бургера → крестик */
+.burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Мобильная панель меню */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--dark);
+  z-index: 150;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.mobile-menu.open {
+  display: flex;
+  opacity: 1;
+}
+.mobile-menu a {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--cream);
+  text-decoration: none;
+  letter-spacing: 2px;
+  padding: 16px 0;
+  opacity: 0.85;
+  transition: opacity 0.3s, color 0.3s;
+  border-bottom: 1px solid rgba(196,168,130,0.1);
+  width: 100%;
+  text-align: center;
+}
+.mobile-menu a:hover { color: var(--accent); opacity: 1; }
+.mobile-menu a:last-child { border-bottom: none; }
+
+/* Переключатель языков в мобильном меню */
+.mobile-menu .mob-langs {
+  display: flex;
+  gap: 10px;
+  margin-top: 36px;
+}
+.mobile-menu .mob-lang-btn {
+  background: transparent;
+  border: 1px solid rgba(196,168,130,0.3);
+  color: rgba(245,240,232,0.6);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.mobile-menu .mob-lang-btn.active {
+  background: var(--accent);
+  color: var(--dark);
+  border-color: var(--accent);
+}
+
+/* Кнопка закрытия меню */
+.mobile-menu .mob-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: transparent;
+  border: none;
+  color: rgba(245,240,232,0.5);
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  transition: color 0.3s;
+}
+.mobile-menu .mob-close:hover { color: var(--cream); }
+
+@media (max-width: 960px) {
+  .burger { display: flex; }
+  .nav-links { display: none !important; }
+  .lang-switcher { display: none !important; }
+  .nav-btn { display: none !important; }
+
+  /* Лого меньше на мобилке */
+  .logo { font-size: 20px; letter-spacing: 4px; }
+
+  /* Hero на телефоне */
+  .hero { padding-top: 70px; }
+  .hero-left { padding: 24px 20px 40px; }
+  .hero-title { font-size: clamp(36px, 10vw, 56px); }
+  .hero-desc { font-size: 14px; }
+  .hero-btns { flex-direction: column; gap: 12px; }
+  .btn-dark, .btn-link { width: 100%; text-align: center; padding: 14px; }
+
+  /* Поиск */
+  .search-wrap { padding: 24px 16px 28px; }
+
+  /* Карточки объектов */
+  .prop-card { cursor: pointer; }
+
+  /* Услуги */
+  .serv-card { padding: 28px 24px; }
+
+  /* Контакты */
+  .contact-form { gap: 12px; }
+  .f-input { padding: 14px; font-size: 14px; }
+
+  /* Футер */
+  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+  .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stat-n { font-size: 48px; }
+  .serv-grid { grid-template-columns: 1fr; }
+  .section { padding: 48px 16px; }
+  .services-section { padding: 48px 16px; }
+}
